@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antonella Morselli - Masajista Profesional</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-logo">
+                <h2>Antonella Morselli</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#servicios">Servicios</a></li>
+                <li><a href="#sobre-mi">Sobre Mí</a></li>
+                <li><a href="#reservar">Reservar</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="hero">
+        <div class="hero-content">
+            <h1>Masajes Terapéuticos Profesionales</h1>
+            <p>Relajación y bienestar para tu cuerpo y mente</p>
+            <a href="#reservar" class="cta-button">Reservar Sesión</a>
+        </div>
+        <div class="hero-image">
+            <i class="fas fa-spa hero-icon"></i>
+        </div>
+    </section>
+
+    <!-- Servicios Section -->
+    <section id="servicios" class="services">
+        <div class="container">
+            <h2>Mis Servicios</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <i class="fas fa-hands"></i>
+                    <h3>Masaje Relajante</h3>
+                    <p>Técnicas suaves para liberar tensiones y promover la relajación profunda.</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-dumbbell"></i>
+                    <h3>Masaje Deportivo</h3>
+                    <p>Especializado en recuperación muscular y prevención de lesiones.</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-leaf"></i>
+                    <h3>Masaje Terapéutico</h3>
+                    <p>Tratamiento específico para dolores y contracturas musculares.</p>
+                </div>
+                <div class="service-card">
+                    <i class="fas fa-heart"></i>
+                    <h3>Masaje Anti-estrés</h3>
+                    <p>Combate el estrés diario y mejora tu bienestar general.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sobre Mí Section -->
+    <section id="sobre-mi" class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>Sobre Mí</h2>
+                    <p>Soy Antonella Morselli, masajista profesional con años de experiencia en técnicas de relajación y terapia corporal. Mi pasión es ayudar a las personas a encontrar equilibrio y bienestar a través del poder sanador del masaje.</p>
+                    <p>Cada sesión es personalizada según las necesidades específicas de cada cliente, utilizando técnicas probadas que combinan tradición y conocimiento moderno.</p>
+                    <div class="credentials">
+                        <div class="credential">
+                            <i class="fas fa-certificate"></i>
+                            <span>Certificada en Masoterapia</span>
+                        </div>
+                        <div class="credential">
+                            <i class="fas fa-award"></i>
+                            <span>Especialista en Técnicas de Relajación</span>
+                        </div>
+                        <div class="credential">
+                            <i class="fas fa-users"></i>
+                            <span>+500 Clientes Satisfechos</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <i class="fas fa-user-md about-icon"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reservar Section -->
+    <section id="reservar" class="booking">
+        <div class="container">
+            <h2>Reservar Sesión</h2>
+            <p class="booking-subtitle">Sesiones de masaje profesional - $5.000</p>
+            
+            <div class="booking-content">
+                <!-- Formulario de Reserva -->
+                <div class="booking-form-container">
+                    <form id="bookingForm" class="booking-form">
+                        <div class="form-group">
+                            <label for="name">Nombre Completo</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="dni">DNI</label>
+                            <input type="text" id="dni" name="dni" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="date">Fecha</label>
+                            <input type="date" id="date" name="date" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="time">Horario</label>
+                            <select id="time" name="time" required>
+                                <option value="">Selecciona un horario</option>
+                                <option value="14:00">14:00</option>
+                                <option value="15:00">15:00</option>
+                                <option value="16:00">16:00</option>
+                                <option value="17:00">17:00</option>
+                            </select>
+                        </div>
+                        
+                        <button type="button" id="payButton" class="pay-button">
+                            <i class="fas fa-credit-card"></i>
+                            Pagar y Reservar - $5.000
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Información de Pago -->
+                <div class="payment-info">
+                    <h3>Información de Pago</h3>
+                    <div class="payment-details">
+                        <div class="payment-item">
+                            <i class="fas fa-credit-card"></i>
+                            <span>Mercado Pago</span>
+                        </div>
+                        <div class="payment-item">
+                            <i class="fas fa-university"></i>
+                            <span>Transferencia Bancaria</span>
+                        </div>
+                        <div class="payment-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Horarios: L-V 14:00-17:00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bank-info">
+                        <h4>Datos Bancarios</h4>
+                        <p><strong>Banco:</strong> Galicia</p>
+                        <p><strong>CBU:</strong> 0070035130004028938809</p>
+                        <p><strong>Titular:</strong> Antonella Morselli</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Antonella Morselli</h3>
+                    <p>Masajista Profesional</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <p><i class="fas fa-phone"></i> +54 9 11 4069-1400</p>
+                    <p><i class="fas fa-envelope"></i> info@antonellamorselli.com</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Horarios</h4>
+                    <p>Lunes a Viernes</p>
+                    <p>14:00 - 17:00</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Antonella Morselli. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal de Pago -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Confirmar Pago y Reserva</h3>
+            <div id="paymentSummary"></div>
+            <div class="payment-options">
+                <button id="mercadoPagoBtn" class="payment-option">
+                    <i class="fas fa-credit-card"></i>
+                    Pagar con Mercado Pago
+                </button>
+                <button id="transferBtn" class="payment-option">
+                    <i class="fas fa-university"></i>
+                    Transferencia Bancaria
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
