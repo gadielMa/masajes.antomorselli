@@ -7,11 +7,8 @@ function isValidDate(date) {
 // Configurar fecha mínima (hoy) y validar días de la semana
 function setupDateValidation() {
     const dateInput = document.getElementById('date');
-    const today = new Date();
-    today.setDate(today.getDate() + 1); // Mínimo mañana
-    
-    // Formatear fecha para input
-    const minDate = today.toISOString().split('T')[0];
+    // Fecha mínima: 23/7/2025
+    const minDate = '2025-07-23';
     dateInput.min = minDate;
     
     // Validar cuando cambia la fecha
@@ -56,14 +53,27 @@ function validateForm() {
         return false;
     }
     
-    // Validar DNI (solo números)
-    if (!/^\d+$/.test(dni)) {
-        alert('El DNI debe contener solo números.');
+    // Validar nombre (solo texto, sin números)
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(name)) {
+        alert('El nombre debe contener solo letras y espacios.');
+        return false;
+    }
+    
+    // Validar DNI (solo números, 7-8 dígitos)
+    if (!/^\d{7,8}$/.test(dni)) {
+        alert('El DNI debe contener entre 7 y 8 dígitos numéricos.');
+        return false;
+    }
+    
+    // Validar fecha mínima
+    const selectedDate = new Date(date);
+    const minDate = new Date('2025-07-23');
+    if (selectedDate < minDate) {
+        alert('La fecha debe ser a partir del 23/7/2025.');
         return false;
     }
     
     // Validar fecha
-    const selectedDate = new Date(date);
     if (!isValidDate(selectedDate)) {
         alert('Solo se pueden reservar citas de lunes a viernes.');
         return false;
@@ -235,6 +245,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Configurar validación de fechas
     setupDateValidation();
     
+    // Configurar validaciones en tiempo real
+    setupRealTimeValidation();
+    
     // Configurar smooth scroll
     setupSmoothScroll();
     
@@ -319,20 +332,64 @@ function showNotification(message, type = 'success') {
 
 // Validación en tiempo real
 function setupRealTimeValidation() {
-    const inputs = document.querySelectorAll('#bookingForm input, #bookingForm select');
+    const nameInput = document.getElementById('name');
+    const dniInput = document.getElementById('dni');
+    const dateInput = document.getElementById('date');
     
+    // Validación del nombre en tiempo real
+    nameInput.addEventListener('input', function() {
+        // Remover números y caracteres especiales
+        this.value = this.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+        
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(this.value)) {
+            this.style.borderColor = '#f44336';
+        } else {
+            this.style.borderColor = '#8B4B6B';
+        }
+    });
+    
+    // Validación del DNI en tiempo real
+    dniInput.addEventListener('input', function() {
+        // Remover caracteres no numéricos
+        this.value = this.value.replace(/[^0-9]/g, '');
+        
+        // Limitar a 8 dígitos máximo
+        if (this.value.length > 8) {
+            this.value = this.value.slice(0, 8);
+        }
+        
+        if (this.value.length < 7 || this.value.length > 8) {
+            this.style.borderColor = '#f44336';
+        } else {
+            this.style.borderColor = '#8B4B6B';
+        }
+    });
+    
+    // Validación de fecha en tiempo real
+    dateInput.addEventListener('change', function() {
+        const selectedDate = new Date(this.value);
+        const minDate = new Date('2025-07-23');
+        
+        if (selectedDate < minDate) {
+            this.style.borderColor = '#f44336';
+            this.setCustomValidity('La fecha debe ser a partir del 23/7/2025');
+        } else if (!isValidDate(selectedDate)) {
+            this.style.borderColor = '#f44336';
+            this.setCustomValidity('Solo se pueden reservar citas de lunes a viernes');
+        } else {
+            this.style.borderColor = '#8B4B6B';
+            this.setCustomValidity('');
+        }
+    });
+    
+    // Validación general para otros campos
+    const inputs = document.querySelectorAll('#bookingForm input, #bookingForm select');
     inputs.forEach(input => {
         input.addEventListener('blur', function() {
             if (this.required && !this.value.trim()) {
                 this.style.borderColor = '#f44336';
-            } else {
+            } else if (this.style.borderColor !== 'rgb(244, 67, 54)') {
                 this.style.borderColor = '#8B4B6B';
-            }
-        });
-        
-        input.addEventListener('input', function() {
-            if (this.style.borderColor === 'rgb(244, 67, 54)') {
-                this.style.borderColor = '#e9ecef';
             }
         });
     });

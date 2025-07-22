@@ -13,6 +13,7 @@
     <header class="header">
         <nav class="nav">
             <div class="nav-logo">
+                <img src="anto.png" alt="Antonella Morselli" class="logo-image">
                 <h2>Antonella Morselli</h2>
             </div>
             <ul class="nav-menu">
@@ -28,7 +29,10 @@
     <!-- Hero Section -->
     <section id="inicio" class="hero">
         <div class="hero-content">
-            <h1>Masajes Terapéuticos Profesionales</h1>
+            <div class="hero-title">
+                <img src="anto.png" alt="Antonella Morselli" class="hero-profile-image">
+                <h1>Masajes Terapéuticos Profesionales</h1>
+            </div>
             <p>Relajación y bienestar para tu cuerpo y mente</p>
             <a href="#reservar" class="cta-button">Reservar Sesión</a>
         </div>
@@ -153,12 +157,14 @@
                     <form id="bookingForm" class="booking-form">
                         <div class="form-group">
                             <label for="name">Nombre Completo</label>
-                            <input type="text" id="name" name="name" required>
+                            <input type="text" id="name" name="name" placeholder="Ej: María Fernández" required>
+                            <small>Solo letras y espacios</small>
                         </div>
                         
                         <div class="form-group">
                             <label for="dni">DNI</label>
-                            <input type="text" id="dni" name="dni" required>
+                            <input type="text" id="dni" name="dni" placeholder="Ej: 12345678" maxlength="8" required>
+                            <small>7 u 8 dígitos numéricos</small>
                         </div>
                         
                         <div class="form-group">
@@ -174,6 +180,7 @@
                         <div class="form-group">
                             <label for="date">Fecha</label>
                             <input type="date" id="date" name="date" required>
+                            <small>Solo lunes a viernes, desde 23/7/2025</small>
                         </div>
                         
                         <div class="form-group">
