@@ -24,14 +24,34 @@ function setupDateValidation() {
     });
 }
 
+// Obtener precio según el servicio
+function getServicePrice(service) {
+    const prices = {
+        'descontracturante': 30000,
+        'relajante': 25000,
+        'deportivo': 35000
+    };
+    return prices[service] || 0;
+}
+
+// Formatear precio
+function formatPrice(price) {
+    return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+        minimumFractionDigits: 0
+    }).format(price);
+}
+
 // Validar formulario
 function validateForm() {
     const name = document.getElementById('name').value.trim();
     const dni = document.getElementById('dni').value.trim();
+    const service = document.getElementById('service').value;
     const date = document.getElementById('date').value;
     const time = document.getElementById('time').value;
     
-    if (!name || !dni || !date || !time) {
+    if (!name || !dni || !service || !date || !time) {
         alert('Por favor, completa todos los campos.');
         return false;
     }
@@ -70,19 +90,27 @@ function showPaymentModal() {
     
     const name = document.getElementById('name').value;
     const dni = document.getElementById('dni').value;
+    const service = document.getElementById('service').value;
     const date = document.getElementById('date').value;
     const time = document.getElementById('time').value;
     
     const formattedDate = formatDate(date);
+    const price = getServicePrice(service);
+    const serviceNames = {
+        'descontracturante': 'Masaje Descontracturante',
+        'relajante': 'Masaje Relajante',
+        'deportivo': 'Masaje Deportivo'
+    };
     
     const summary = `
         <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin-bottom: 1rem;">
             <h4 style="color: #2c3e50; margin-bottom: 1rem;">Resumen de la Reserva</h4>
             <p><strong>Nombre:</strong> ${name}</p>
             <p><strong>DNI:</strong> ${dni}</p>
+            <p><strong>Servicio:</strong> ${serviceNames[service]}</p>
             <p><strong>Fecha:</strong> ${formattedDate}</p>
             <p><strong>Horario:</strong> ${time}</p>
-            <p><strong>Precio:</strong> $5.000</p>
+            <p><strong>Precio:</strong> ${formatPrice(price)}</p>
         </div>
     `;
     
@@ -120,7 +148,10 @@ function processMercadoPago() {
 
 // Procesar transferencia bancaria
 function processBankTransfer() {
-    alert(`Por favor, realiza la transferencia a:\n\nBanco Galicia\nCBU: 0070035130004028938809\nTitular: Antonella Morselli\nMonto: $5.000\n\nUna vez realizada la transferencia, tu reserva será confirmada automáticamente.`);
+    const service = document.getElementById('service').value;
+    const price = getServicePrice(service);
+    
+    alert(`Por favor, realiza la transferencia a:\n\nBanco Galicia\nCBU: 0070035130004028938809\nTitular: Antonella Morselli\nMonto: ${formatPrice(price)}\n\nUna vez realizada la transferencia, tu reserva será confirmada automáticamente.`);
     
     // Simular transferencia exitosa
     setTimeout(() => {
@@ -149,14 +180,20 @@ function processSuccessfulPayment() {
 function sendWhatsApp() {
     const name = document.getElementById('name').value;
     const dni = document.getElementById('dni').value;
+    const service = document.getElementById('service').value;
     const date = document.getElementById('date').value;
     const time = document.getElementById('time').value;
     
     // Formatear fecha para WhatsApp
     const formattedDate = new Date(date).toLocaleDateString('es-ES');
+    const serviceNames = {
+        'descontracturante': 'Masaje Descontracturante',
+        'relajante': 'Masaje Relajante',
+        'deportivo': 'Masaje Deportivo'
+    };
     
     // Crear mensaje
-    const message = `¡Hola Anto! Te acabo de reservar el ${formattedDate} a las ${time}.\n${name}\nDNI ${dni}`;
+    const message = `¡Hola Anto! Te acabo de reservar el ${formattedDate} a las ${time}.\nServicio: ${serviceNames[service]}\n${name}\nDNI ${dni}`;
     
     // Número de WhatsApp de Antonella
     const phoneNumber = '5491140691400'; // +54 9 11 4069-1400

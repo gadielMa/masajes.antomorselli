@@ -19,6 +19,7 @@
                 <li><a href="#inicio">Inicio</a></li>
                 <li><a href="#servicios">Servicios</a></li>
                 <li><a href="#sobre-mi">Sobre Mí</a></li>
+                <li><a href="#ubicacion">Ubicación</a></li>
                 <li><a href="#reservar">Reservar</a></li>
             </ul>
         </nav>
@@ -42,24 +43,28 @@
             <h2>Mis Servicios</h2>
             <div class="services-grid">
                 <div class="service-card">
+                    <i class="fas fa-leaf"></i>
+                    <h3>Masaje Descontracturante</h3>
+                    <p>Tratamiento específico para dolores y contracturas musculares.</p>
+                    <div class="price">$30.000</div>
+                </div>
+                <div class="service-card">
                     <i class="fas fa-hands"></i>
                     <h3>Masaje Relajante</h3>
                     <p>Técnicas suaves para liberar tensiones y promover la relajación profunda.</p>
+                    <div class="price">$25.000</div>
                 </div>
                 <div class="service-card">
                     <i class="fas fa-dumbbell"></i>
                     <h3>Masaje Deportivo</h3>
                     <p>Especializado en recuperación muscular y prevención de lesiones.</p>
+                    <div class="price">$35.000</div>
                 </div>
                 <div class="service-card">
-                    <i class="fas fa-leaf"></i>
-                    <h3>Masaje Terapéutico</h3>
-                    <p>Tratamiento específico para dolores y contracturas musculares.</p>
-                </div>
-                <div class="service-card">
-                    <i class="fas fa-heart"></i>
-                    <h3>Masaje Anti-estrés</h3>
-                    <p>Combate el estrés diario y mejora tu bienestar general.</p>
+                    <i class="fas fa-spa"></i>
+                    <h3>Sesiones Combinadas</h3>
+                    <p>Combina diferentes técnicas según tus necesidades específicas.</p>
+                    <div class="price">Consultar</div>
                 </div>
             </div>
         </div>
@@ -95,11 +100,52 @@
         </div>
     </section>
 
+    <!-- Ubicación Section -->
+    <section id="ubicacion" class="location">
+        <div class="container">
+            <h2>Ubicación</h2>
+            <p class="location-subtitle">Villa Devoto, Capital Federal, Argentina</p>
+            
+            <div class="location-content">
+                <div class="location-info">
+                    <h3>¿Dónde me encuentro?</h3>
+                    <p>Atiendo en Villa Devoto, un barrio tranquilo y accesible de Capital Federal. Mi consultorio está equipado con todo lo necesario para brindarte la mejor experiencia de relajación.</p>
+                    
+                    <div class="location-details">
+                        <div class="location-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Villa Devoto, CABA</span>
+                        </div>
+                        <div class="location-item">
+                            <i class="fas fa-subway"></i>
+                            <span>Cerca del transporte público</span>
+                        </div>
+                        <div class="location-item">
+                            <i class="fas fa-car"></i>
+                            <span>Fácil acceso en auto</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="map-container">
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d26272.89967764547!2d-58.512841!3d-34.605577!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95bcb679b5b8df07%3A0x8e5d8c5f5b8c5f5b!2sVilla%20Devoto%2C%20Buenos%20Aires%2C%20Argentina!5e0!3m2!1ses!2sar!4v1642784000000!5m2!1ses!2sar"
+                        width="100%" 
+                        height="300" 
+                        style="border:0; border-radius: 15px;" 
+                        allowfullscreen="" 
+                        loading="lazy">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Reservar Section -->
     <section id="reservar" class="booking">
         <div class="container">
             <h2>Reservar Sesión</h2>
-            <p class="booking-subtitle">Sesiones de masaje profesional - $5.000</p>
+            <p class="booking-subtitle">Elige tu servicio y agenda tu cita</p>
             
             <div class="booking-content">
                 <!-- Formulario de Reserva -->
@@ -113,6 +159,16 @@
                         <div class="form-group">
                             <label for="dni">DNI</label>
                             <input type="text" id="dni" name="dni" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="service">Tipo de Masaje</label>
+                            <select id="service" name="service" required>
+                                <option value="">Selecciona un servicio</option>
+                                <option value="descontracturante">Masaje Descontracturante - $30.000</option>
+                                <option value="relajante">Masaje Relajante - $25.000</option>
+                                <option value="deportivo">Masaje Deportivo - $35.000</option>
+                            </select>
                         </div>
                         
                         <div class="form-group">
@@ -133,7 +189,7 @@
                         
                         <button type="button" id="payButton" class="pay-button">
                             <i class="fas fa-credit-card"></i>
-                            Pagar y Reservar - $5.000
+                            Pagar y Reservar
                         </button>
                     </form>
                 </div>
@@ -178,7 +234,8 @@
                 <div class="footer-section">
                     <h4>Contacto</h4>
                     <p><i class="fas fa-phone"></i> +54 9 11 4069-1400</p>
-                    <p><i class="fas fa-envelope"></i> info@antonellamorselli.com</p>
+                    <p><i class="fab fa-instagram"></i> <a href="https://www.instagram.com/masoterapia_antonella/" target="_blank" style="color: inherit; text-decoration: none;">@masoterapia_antonella</a></p>
+                    <p><i class="fas fa-map-marker-alt"></i> Villa Devoto, CABA</p>
                 </div>
                 <div class="footer-section">
                     <h4>Horarios</h4>
@@ -187,7 +244,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Antonella Morselli. Todos los derechos reservados.</p>
+                <p>&copy; 2025 Antonella Morselli. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
