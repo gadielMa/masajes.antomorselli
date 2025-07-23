@@ -166,9 +166,9 @@ function processBankTransfer() {
     const service = document.getElementById('service').value;
     const price = getServicePrice(service);
     
-    alert(`Por favor, realiza la transferencia a:\n\nBanco Galicia\nCBU: 0070035130004028938809\nTitular: Antonella Morselli\nMonto: ${formatPrice(price)}\n\nUna vez realizada la transferencia, tu reserva será confirmada automáticamente.`);
+    alert(`Por favor, realiza la transferencia a:\n\nBanco Galicia\nCBU: 0070035130004028938809\nTitular: Antonella Morselli\nMonto: ${formatPrice(price)}\n\nEnvía el comprobante por WhatsApp a Antonella para confirmar tu reserva.`);
     
-    // Simular transferencia exitosa
+    // Después de mostrar los datos, proceder con WhatsApp
     setTimeout(() => {
         const confirmed = confirm('¿Has realizado la transferencia bancaria?');
         if (confirmed) {
@@ -245,6 +245,26 @@ function setupSmoothScroll() {
     });
 }
 
+// Verificar si hay una reserva pendiente y mostrar botón de confirmación
+function checkPendingBooking() {
+    const bookingData = localStorage.getItem('bookingData');
+    const paymentConfirmation = document.getElementById('paymentConfirmation');
+    
+    if (bookingData && paymentConfirmation) {
+        // Mostrar el botón de confirmación
+        paymentConfirmation.style.display = 'block';
+        
+        // Configurar el botón de confirmación
+        const confirmBtn = document.getElementById('confirmPaymentBtn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', function() {
+                // Redirigir a página de éxito
+                window.location.href = 'exito.html';
+            });
+        }
+    }
+}
+
 // Verificar si el usuario volvió de Mercado Pago
 function checkReturnFromPayment() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -264,6 +284,9 @@ function checkReturnFromPayment() {
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar retorno de pago
     checkReturnFromPayment();
+    
+    // Verificar reserva pendiente
+    checkPendingBooking();
     
     // Configurar validación de fechas
     setupDateValidation();
