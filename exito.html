@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Google Calendar Integration -->
+    <script src="calendar-config.js"></script>
+    <script src="calendar-api.js"></script>
     <style>
         .success-page {
             min-height: 100vh;
@@ -345,11 +349,33 @@
             }, 1000);
         }
 
+        // Crear evento en calendario
+        async function createCalendarEvent(bookingData) {
+            try {
+                await calendarAPI.init();
+                const result = await calendarAPI.createEvent(bookingData);
+                
+                if (result.success) {
+                    console.log('✅ Evento creado en Google Calendar:', result.eventId);
+                    return result;
+                } else {
+                    console.warn('⚠️ No se pudo crear evento en calendario:', result.error);
+                    return result;
+                }
+            } catch (error) {
+                console.error('❌ Error creando evento:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
         // Inicializar página
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             const bookingData = loadBookingData();
             
             if (bookingData) {
+                // Crear evento en Google Calendar
+                createCalendarEvent(bookingData);
+                
                 // Configurar botón manual de WhatsApp
                 document.getElementById('sendWhatsAppBtn').addEventListener('click', function() {
                     sendWhatsApp(bookingData);

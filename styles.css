@@ -459,6 +459,69 @@ body {
     font-style: italic;
 }
 
+.availability-info {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.availability-info.available {
+    background: #e8f5e8;
+    color: #2e7d32;
+    border: 1px solid #4caf50;
+}
+
+.availability-info.limited {
+    background: #fff3e0;
+    color: #ef6c00;
+    border: 1px solid #ff9800;
+}
+
+.availability-info.full {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #f44336;
+}
+
+.time-slot {
+    display: inline-block;
+    margin: 0.25rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.time-slot.available {
+    background: #e8f5e8;
+    color: #2e7d32;
+    border-color: #4caf50;
+}
+
+.time-slot.available:hover {
+    background: #4caf50;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.time-slot.occupied {
+    background: #ffebee;
+    color: #c62828;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.time-slot.selected {
+    background: #8B4B6B;
+    color: white;
+    border-color: #8B4B6B;
+}
+
 .pay-button {
     width: 100%;
     background: linear-gradient(135deg, #8B4B6B, #a56082);

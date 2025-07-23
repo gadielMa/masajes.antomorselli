@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Google Calendar Integration -->
+    <script src="calendar-config.js"></script>
+    <script src="calendar-api.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -196,12 +200,11 @@
                         <div class="form-group">
                             <label for="time">Horario</label>
                             <select id="time" name="time" required>
-                                <option value="">Selecciona un horario</option>
-                                <option value="14:00">14:00</option>
-                                <option value="15:00">15:00</option>
-                                <option value="16:00">16:00</option>
-                                <option value="17:00">17:00</option>
+                                <option value="">Primero selecciona una fecha</option>
                             </select>
+                            <div id="availabilityInfo" class="availability-info" style="display: none;">
+                                <span id="availableCount"></span>
+                            </div>
                         </div>
                         
                         <button type="button" id="payButton" class="pay-button">

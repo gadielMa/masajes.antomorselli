@@ -178,17 +178,43 @@ function processBankTransfer() {
 }
 
 // Procesar pago exitoso
-function processSuccessfulPayment() {
+async function processSuccessfulPayment() {
     closeModal();
     
-    // Mostrar mensaje de éxito
-    alert('¡Pago realizado con éxito! Tu reserva ha sido confirmada. Se enviará un mensaje de WhatsApp a Antonella.');
-    
-    // Enviar WhatsApp
-    sendWhatsApp();
-    
-    // Limpiar formulario
-    document.getElementById('bookingForm').reset();
+    try {
+        // Obtener datos de la reserva
+        const bookingData = {
+            name: document.getElementById('name').value,
+            dni: document.getElementById('dni').value,
+            service: document.getElementById('service').value,
+            date: document.getElementById('date').value,
+            time: document.getElementById('time').value
+        };
+        
+        // Crear evento en Google Calendar
+        const calendarResult = await calendarAPI.createEvent(bookingData);
+        
+        if (calendarResult.success) {
+            console.log('Evento creado en calendario:', calendarResult.eventId);
+        } else {
+            console.warn('No se pudo crear el evento en calendario:', calendarResult.error);
+        }
+        
+        // Mostrar mensaje de éxito
+        alert('¡Pago realizado con éxito! Tu reserva ha sido confirmada. Se enviará un mensaje de WhatsApp a Antonella.');
+        
+        // Enviar WhatsApp
+        sendWhatsApp();
+        
+        // Limpiar formulario
+        document.getElementById('bookingForm').reset();
+        clearTimeSlots();
+        
+    } catch (error) {
+        console.error('Error procesando pago:', error);
+        alert('Pago realizado, pero hubo un problema al procesar la reserva. Por favor contacta a Antonella directamente.');
+        sendWhatsApp();
+    }
 }
 
 // Enviar mensaje de WhatsApp
@@ -281,7 +307,10 @@ function checkReturnFromPayment() {
 }
 
 // Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Inicializar Google Calendar API
+    await calendarAPI.init();
+    
     // Verificar retorno de pago
     checkReturnFromPayment();
     
@@ -376,6 +405,75 @@ function showNotification(message, type = 'success') {
     }, 3000);
 }
 
+// Cargar horarios disponibles para una fecha
+async function loadAvailableTimeSlots(date) {
+    const timeSelect = document.getElementById('time');
+    const availabilityInfo = document.getElementById('availabilityInfo');
+    const availableCount = document.getElementById('availableCount');
+    
+    try {
+        // Mostrar loading
+        timeSelect.innerHTML = '<option value="">Cargando horarios...</option>';
+        timeSelect.disabled = true;
+        
+        // Obtener horarios disponibles
+        const availableSlots = await calendarAPI.getAvailableSlots(date);
+        
+        // Limpiar opciones
+        timeSelect.innerHTML = '<option value="">Selecciona un horario</option>';
+        
+        if (availableSlots.length === 0) {
+            timeSelect.innerHTML = '<option value="">No hay horarios disponibles</option>';
+            availabilityInfo.style.display = 'block';
+            availabilityInfo.className = 'availability-info full';
+            availableCount.textContent = 'No hay turnos disponibles para esta fecha';
+        } else {
+            // Agregar horarios disponibles
+            availableSlots.forEach(slot => {
+                const option = document.createElement('option');
+                option.value = slot.time;
+                option.textContent = slot.time + ' hs';
+                timeSelect.appendChild(option);
+            });
+            
+            // Mostrar información de disponibilidad
+            availabilityInfo.style.display = 'block';
+            const totalSlots = 4; // 14-17hs = 4 horarios posibles
+            const availableSlotCount = availableSlots.length;
+            
+            if (availableSlotCount === totalSlots) {
+                availabilityInfo.className = 'availability-info available';
+                availableCount.textContent = `✅ ${availableSlotCount} turnos disponibles`;
+            } else if (availableSlotCount > 1) {
+                availabilityInfo.className = 'availability-info limited';
+                availableCount.textContent = `⚠️ ${availableSlotCount} turnos disponibles`;
+            } else {
+                availabilityInfo.className = 'availability-info limited';
+                availableCount.textContent = `⚠️ Solo ${availableSlotCount} turno disponible`;
+            }
+        }
+        
+        timeSelect.disabled = false;
+        
+    } catch (error) {
+        console.error('Error cargando horarios:', error);
+        timeSelect.innerHTML = '<option value="">Error cargando horarios</option>';
+        availabilityInfo.style.display = 'block';
+        availabilityInfo.className = 'availability-info full';
+        availableCount.textContent = 'Error al cargar la disponibilidad';
+        timeSelect.disabled = false;
+    }
+}
+
+// Limpiar selector de horarios
+function clearTimeSlots() {
+    const timeSelect = document.getElementById('time');
+    const availabilityInfo = document.getElementById('availabilityInfo');
+    
+    timeSelect.innerHTML = '<option value="">Primero selecciona una fecha</option>';
+    availabilityInfo.style.display = 'none';
+}
+
 // Función para testing de la página de éxito
 function testSuccessPage() {
     // Crear datos de prueba
@@ -431,19 +529,23 @@ function setupRealTimeValidation() {
     });
     
     // Validación de fecha en tiempo real
-    dateInput.addEventListener('change', function() {
+    dateInput.addEventListener('change', async function() {
         const selectedDate = new Date(this.value);
         const minDate = new Date('2025-07-23');
         
         if (selectedDate < minDate) {
             this.style.borderColor = '#f44336';
             this.setCustomValidity('La fecha debe ser a partir del 23/7/2025');
+            clearTimeSlots();
         } else if (!isValidDate(selectedDate)) {
             this.style.borderColor = '#f44336';
             this.setCustomValidity('Solo se pueden reservar citas de lunes a viernes');
+            clearTimeSlots();
         } else {
             this.style.borderColor = '#8B4B6B';
             this.setCustomValidity('');
+            // Cargar horarios disponibles
+            await loadAvailableTimeSlots(this.value);
         }
     });
     
