@@ -130,30 +130,35 @@ function showPaymentModal() {
 
 // Generar link de Mercado Pago
 function generateMercadoPagoLink() {
-    const name = document.getElementById('name').value;
-    const date = document.getElementById('date').value;
-    const time = document.getElementById('time').value;
-    
-    // Crear descripción del pago
-    const description = `Sesión de masaje - ${name} - ${formatDate(date)} ${time}`;
-    
-    // URL base de Mercado Pago para transferencias
-    const mercadoPagoUrl = `https://www.mercadopago.com.ar/money-request/new`;
+    // Link de Mercado Pago de Antonella
+    const mercadoPagoUrl = `https://mpago.la/1zx2bg3`;
     
     return mercadoPagoUrl;
 }
 
+// Guardar datos de la reserva en localStorage
+function saveBookingData() {
+    const bookingData = {
+        name: document.getElementById('name').value,
+        dni: document.getElementById('dni').value,
+        service: document.getElementById('service').value,
+        date: document.getElementById('date').value,
+        time: document.getElementById('time').value,
+        timestamp: new Date().toISOString()
+    };
+    
+    localStorage.setItem('bookingData', JSON.stringify(bookingData));
+}
+
 // Procesar pago con Mercado Pago
 function processMercadoPago() {
+    // Guardar datos de la reserva antes de redirigir
+    saveBookingData();
+    
     const mercadoPagoUrl = generateMercadoPagoLink();
     
-    // Abrir Mercado Pago en nueva ventana
-    window.open(mercadoPagoUrl, '_blank');
-    
-    // Simular pago exitoso después de 3 segundos (en producción, esto vendría de MP)
-    setTimeout(() => {
-        processSuccessfulPayment();
-    }, 3000);
+    // Redirigir a Mercado Pago
+    window.location.href = mercadoPagoUrl;
 }
 
 // Procesar transferencia bancaria
@@ -240,8 +245,26 @@ function setupSmoothScroll() {
     });
 }
 
+// Verificar si el usuario volvió de Mercado Pago
+function checkReturnFromPayment() {
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    // Si hay datos de reserva y parámetros de pago, redirigir a página de éxito
+    if (localStorage.getItem('bookingData') && (
+        urlParams.get('collection_status') === 'approved' ||
+        urlParams.get('status') === 'approved' ||
+        urlParams.get('payment_id') ||
+        urlParams.get('collection_id')
+    )) {
+        window.location.href = 'exito.html';
+    }
+}
+
 // Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
+    // Verificar retorno de pago
+    checkReturnFromPayment();
+    
     // Configurar validación de fechas
     setupDateValidation();
     
