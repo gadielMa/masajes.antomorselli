@@ -376,6 +376,25 @@ function showNotification(message, type = 'success') {
     }, 3000);
 }
 
+// Función para testing de la página de éxito
+function testSuccessPage() {
+    // Crear datos de prueba
+    const testBookingData = {
+        name: 'María Fernández',
+        dni: '12345678',
+        service: 'relajante',
+        date: '2025-07-25',
+        time: '15:00',
+        timestamp: new Date().toISOString()
+    };
+    
+    // Guardar en localStorage
+    localStorage.setItem('bookingData', JSON.stringify(testBookingData));
+    
+    // Redirigir a página de éxito
+    window.location.href = 'exito.html';
+}
+
 // Validación en tiempo real
 function setupRealTimeValidation() {
     const nameInput = document.getElementById('name');

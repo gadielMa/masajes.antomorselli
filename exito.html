@@ -189,6 +189,11 @@
                     <i class="fas fa-home"></i>
                     Volver al Inicio
                 </a>
+                
+                <button id="debugBtn" class="btn" style="background: #666; color: white; font-size: 0.8rem;">
+                    <i class="fas fa-bug"></i>
+                    Debug: Ver datos
+                </button>
             </div>
             
             <div class="countdown">
@@ -231,6 +236,13 @@
 
         // Enviar mensaje de WhatsApp
         function sendWhatsApp(bookingData) {
+            // Validar que existan los datos necesarios
+            if (!bookingData || !bookingData.name || !bookingData.date || !bookingData.time || !bookingData.service) {
+                alert('Error: No se encontraron los datos de la reserva. Por favor, realiza una nueva reserva desde el inicio.');
+                window.location.href = 'index.html';
+                return;
+            }
+            
             const serviceNames = {
                 'descontracturante': 'Masaje Descontracturante',
                 'relajante': 'Masaje Relajante',
@@ -249,6 +261,9 @@
             // Crear URL de WhatsApp
             const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
             
+            console.log('Mensaje WhatsApp:', message);
+            console.log('URL WhatsApp:', whatsappUrl);
+            
             // Abrir WhatsApp
             window.open(whatsappUrl, '_blank');
         }
@@ -258,8 +273,14 @@
             const bookingDataString = localStorage.getItem('bookingData');
             
             if (!bookingDataString) {
-                // Si no hay datos, redirigir al inicio
-                window.location.href = 'index.html';
+                // Si no hay datos, mostrar mensaje y redirigir al inicio
+                document.getElementById('bookingSummary').innerHTML = `
+                    <h3>⚠️ No hay datos de reserva</h3>
+                    <p>No se encontraron datos de una reserva pendiente. Serás redirigido al inicio en 3 segundos.</p>
+                `;
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 3000);
                 return null;
             }
             
@@ -334,6 +355,12 @@
                     sendWhatsApp(bookingData);
                 });
                 
+                // Configurar botón de debug
+                document.getElementById('debugBtn').addEventListener('click', function() {
+                    console.log('Datos de reserva:', bookingData);
+                    alert(`Datos de reserva:\n\nNombre: ${bookingData.name}\nDNI: ${bookingData.dni}\nServicio: ${bookingData.service}\nFecha: ${bookingData.date}\nHora: ${bookingData.time}`);
+                });
+                
                 // Iniciar countdown automático
                 startCountdown(bookingData);
                 
@@ -341,6 +368,11 @@
                 setTimeout(() => {
                     localStorage.removeItem('bookingData');
                 }, 30000);
+            } else {
+                // Si no hay datos, ocultar botones de WhatsApp y debug
+                document.getElementById('sendWhatsAppBtn').style.display = 'none';
+                document.getElementById('debugBtn').style.display = 'none';
+                document.querySelector('.countdown').style.display = 'none';
             }
         });
     </script>
