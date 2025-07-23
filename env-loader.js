@@ -21,14 +21,14 @@ class EnvLoader {
     // Variables para producción (GitHub Pages)
     loadProductionEnv() {
         this.env = {
-            GOOGLE_API_KEY: 'AIzaSyAcqD9F9ghAAtQ3dgmHheWIYzVEdhqo3Cc',
-            GOOGLE_CLIENT_ID: '1070397058047-24s5qj4hmkl6ia3dvf4hpoqbifaa9aan.apps.googleusercontent.com',
-            GOOGLE_CALENDAR_ID: 'gadiel.malagrino@gmail.com',
-            MERCADOPAGO_LINK: 'https://mpago.la/1zx2bg3',
-            WHATSAPP_PHONE: '5491140691400',
-            BANK_NAME: 'Galicia',
-            BANK_CBU: '0070035130004028938809',
-            BANK_OWNER: 'Antonella Morselli'
+            GOOGLE_API_KEY: 'TU_API_KEY_AQUI',
+            GOOGLE_CLIENT_ID: 'TU_CLIENT_ID_AQUI.apps.googleusercontent.com',
+            GOOGLE_CALENDAR_ID: 'tu_email@gmail.com',
+            MERCADOPAGO_LINK: 'https://mpago.la/tu_link_aqui',
+            WHATSAPP_PHONE: '54911xxxxxxxx',
+            BANK_NAME: 'Tu_Banco',
+            BANK_CBU: 'tu_cbu_aqui',
+            BANK_OWNER: 'Tu Nombre Completo'
         };
         console.log('🌍 Variables de producción cargadas');
         return true;
