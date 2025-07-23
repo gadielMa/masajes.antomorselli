@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Google Calendar Integration -->
+    <script src="env-loader.js"></script>
     <script src="calendar-config.js"></script>
     <script src="calendar-api.js"></script>
     <style>
@@ -260,7 +261,7 @@
             const message = `¡Hola Anto! Te acabo de reservar el ${formattedDate} a las ${bookingData.time}.\nServicio: ${serviceNames[bookingData.service]}\n${bookingData.name}\nDNI ${bookingData.dni}\n\n✅ Pago confirmado vía Mercado Pago`;
             
             // Número de WhatsApp de Antonella
-            const phoneNumber = '5491140691400'; // +54 9 11 4069-1400
+            const phoneNumber = envLoader.get('WHATSAPP_PHONE') || '5491140691400';
             
             // Crear URL de WhatsApp
             const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
@@ -370,6 +371,9 @@
 
         // Inicializar página
         document.addEventListener('DOMContentLoaded', async function() {
+            // Cargar variables de entorno
+            await envLoader.loadEnv();
+            
             const bookingData = loadBookingData();
             
             if (bookingData) {

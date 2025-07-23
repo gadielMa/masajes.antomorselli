@@ -1,0 +1,29 @@
+# 🔐 Archivos sensibles - NO SUBIR
+.env
+.env.local
+.env.production
+
+# 📁 Archivos del sistema
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 🔧 Archivos de desarrollo
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 📝 Archivos temporales
+*.tmp
+*.temp
+*.log
+
+# 🔑 Credenciales y configuración local
+config.local.js
+credentials.json
+.credentials/ 

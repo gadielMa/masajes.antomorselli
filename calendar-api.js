@@ -11,6 +11,9 @@ class CalendarAPI {
     // Inicializar Google API
     async init() {
         try {
+            // Cargar configuración desde variables de entorno
+            await loadCalendarConfig();
+            
             if (!isCalendarConfigured()) {
                 console.warn('📅 Google Calendar no está configurado. Usando modo simulación.');
                 return false;

@@ -128,13 +128,7 @@ function showPaymentModal() {
     document.getElementById('paymentModal').style.display = 'block';
 }
 
-// Generar link de Mercado Pago
-function generateMercadoPagoLink() {
-    // Link de Mercado Pago de Antonella
-    const mercadoPagoUrl = `https://mpago.la/1zx2bg3`;
-    
-    return mercadoPagoUrl;
-}
+// Las credenciales ahora se cargan desde variables de entorno
 
 // Guardar datos de la reserva en localStorage
 function saveBookingData() {
@@ -155,7 +149,7 @@ function processMercadoPago() {
     // Guardar datos de la reserva antes de redirigir
     saveBookingData();
     
-    const mercadoPagoUrl = generateMercadoPagoLink();
+    const mercadoPagoUrl = envLoader.get('MERCADOPAGO_LINK') || 'https://mpago.la/tu_link_aqui';
     
     // Redirigir a Mercado Pago
     window.location.href = mercadoPagoUrl;
@@ -166,7 +160,11 @@ function processBankTransfer() {
     const service = document.getElementById('service').value;
     const price = getServicePrice(service);
     
-    alert(`Por favor, realiza la transferencia a:\n\nBanco Galicia\nCBU: 0070035130004028938809\nTitular: Antonella Morselli\nMonto: ${formatPrice(price)}\n\nEnvía el comprobante por WhatsApp a Antonella para confirmar tu reserva.`);
+    const bankName = envLoader.get('BANK_NAME') || 'Banco';
+    const bankCBU = envLoader.get('BANK_CBU') || 'CBU_NO_CONFIGURADO';
+    const bankOwner = envLoader.get('BANK_OWNER') || 'Titular';
+    
+    alert(`Por favor, realiza la transferencia a:\n\nBanco ${bankName}\nCBU: ${bankCBU}\nTitular: ${bankOwner}\nMonto: ${formatPrice(price)}\n\nEnvía el comprobante por WhatsApp a Antonella para confirmar tu reserva.`);
     
     // Después de mostrar los datos, proceder con WhatsApp
     setTimeout(() => {
@@ -237,7 +235,7 @@ function sendWhatsApp() {
     const message = `¡Hola Anto! Te acabo de reservar el ${formattedDate} a las ${time}.\nServicio: ${serviceNames[service]}\n${name}\nDNI ${dni}`;
     
     // Número de WhatsApp de Antonella
-    const phoneNumber = '5491140691400'; // +54 9 11 4069-1400
+    const phoneNumber = envLoader.get('WHATSAPP_PHONE') || '5491140691400';
     
     // Crear URL de WhatsApp
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
@@ -308,6 +306,12 @@ function checkReturnFromPayment() {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', async function() {
+    // Cargar variables de entorno
+    await envLoader.loadEnv();
+    
+    // Actualizar UI con datos bancarios
+    updateBankInfo();
+    
     // Inicializar Google Calendar API
     const calendarInitialized = await calendarAPI.init();
     
@@ -475,6 +479,17 @@ function clearTimeSlots() {
     
     timeSelect.innerHTML = '<option value="">Primero selecciona una fecha</option>';
     availabilityInfo.style.display = 'none';
+}
+
+// Actualizar información bancaria en la UI
+function updateBankInfo() {
+    const bankNameEl = document.getElementById('bankName');
+    const bankCBUEl = document.getElementById('bankCBU');
+    const bankOwnerEl = document.getElementById('bankOwner');
+    
+    if (bankNameEl) bankNameEl.textContent = envLoader.get('BANK_NAME') || 'No configurado';
+    if (bankCBUEl) bankCBUEl.textContent = envLoader.get('BANK_CBU') || 'No configurado';
+    if (bankOwnerEl) bankOwnerEl.textContent = envLoader.get('BANK_OWNER') || 'No configurado';
 }
 
 // Configurar botón de autenticación

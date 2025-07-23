@@ -6,15 +6,12 @@
 // 4. Crear credenciales (API Key + OAuth 2.0)
 // 5. Reemplazar los valores aquí
 
-const CALENDAR_CONFIG = {
-    // API Key de Google Calendar (pública, segura para frontend)
-    API_KEY: 'AIzaSyAcqD9F9ghAAtQ3dgmHheWIYzVEdhqo3Cc', // Reemplazar con la API Key real
-    
-    // Client ID para OAuth 2.0
-    CLIENT_ID: '1070397058047-24s5qj4hmkl6ia3dvf4hpoqbifaa9aan.apps.googleusercontent.com', // Reemplazar con el Client ID real
-    
-    // ID del calendario de Antonella (su email de Google)
-    CALENDAR_ID: 'gadiel.malagrino@gmail.com', // Reemplazar con el email real de Antonella
+// 🔄 Configuración dinámica que se carga desde variables de entorno
+let CALENDAR_CONFIG = {
+    // Se cargarán dinámicamente desde .env (local) o producción
+    API_KEY: '', 
+    CLIENT_ID: '', 
+    CALENDAR_ID: '',
     
     // Configuración de horarios de trabajo
     WORKING_HOURS: {
@@ -29,11 +26,28 @@ const CALENDAR_CONFIG = {
     SCOPES: 'https://www.googleapis.com/auth/calendar'
 };
 
+// Cargar configuración desde variables de entorno
+async function loadCalendarConfig() {
+    await envLoader.loadEnv();
+    
+    CALENDAR_CONFIG.API_KEY = envLoader.get('GOOGLE_API_KEY');
+    CALENDAR_CONFIG.CLIENT_ID = envLoader.get('GOOGLE_CLIENT_ID');
+    CALENDAR_CONFIG.CALENDAR_ID = envLoader.get('GOOGLE_CALENDAR_ID');
+    
+    console.log('📅 Configuración de Calendar cargada:', {
+        API_KEY: CALENDAR_CONFIG.API_KEY ? '✅ Configurada' : '❌ Faltante',
+        CLIENT_ID: CALENDAR_CONFIG.CLIENT_ID ? '✅ Configurada' : '❌ Faltante',
+        CALENDAR_ID: CALENDAR_CONFIG.CALENDAR_ID || '❌ Faltante'
+    });
+}
+
 // Función para verificar si la configuración está completa
 function isCalendarConfigured() {
-    return CALENDAR_CONFIG.API_KEY !== 'TU_API_KEY_AQUI' && 
-           CALENDAR_CONFIG.CLIENT_ID !== 'TU_CLIENT_ID_AQUI' &&
-           CALENDAR_CONFIG.CALENDAR_ID !== 'antonella@gmail.com';
+    return CALENDAR_CONFIG.API_KEY && 
+           CALENDAR_CONFIG.CLIENT_ID &&
+           CALENDAR_CONFIG.CALENDAR_ID &&
+           !CALENDAR_CONFIG.API_KEY.includes('TU_') &&
+           !CALENDAR_CONFIG.CLIENT_ID.includes('TU_');
 }
 
 // Exportar configuración

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Google Calendar Integration -->
+    <script src="env-loader.js"></script>
     <script src="calendar-config.js"></script>
     <script src="calendar-api.js"></script>
 </head>
@@ -241,9 +242,9 @@
                     
                     <div class="bank-info">
                         <h4>Datos Bancarios</h4>
-                        <p><strong>Banco:</strong> Galicia</p>
-                        <p><strong>CBU:</strong> 0070035130004028938809</p>
-                        <p><strong>Titular:</strong> Antonella Morselli</p>
+                        <p><strong>Banco:</strong> <span id="bankName">Cargando...</span></p>
+                        <p><strong>CBU:</strong> <span id="bankCBU">Cargando...</span></p>
+                        <p><strong>Titular:</strong> <span id="bankOwner">Cargando...</span></p>
                     </div>
                 </div>
             </div>
