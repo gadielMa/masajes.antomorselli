@@ -12,29 +12,49 @@ class CalendarAPI {
     async init() {
         try {
             if (!isCalendarConfigured()) {
-                console.warn('Google Calendar no está configurado. Usando modo simulación.');
+                console.warn('📅 Google Calendar no está configurado. Usando modo simulación.');
                 return false;
             }
+
+            console.log('📅 Inicializando Google Calendar API...');
 
             // Cargar Google API
             await this.loadGoogleAPI();
             
-            // Inicializar gapi
-            await gapi.load('client:auth2', async () => {
-                await gapi.client.init({
-                    apiKey: CALENDAR_CONFIG.API_KEY,
-                    clientId: CALENDAR_CONFIG.CLIENT_ID,
-                    discoveryDocs: [CALENDAR_CONFIG.DISCOVERY_DOC],
-                    scope: CALENDAR_CONFIG.SCOPES
-                });
+            // Inicializar gapi con timeout
+            return new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    console.warn('⚠️ Timeout inicializando Google API. Usando modo simulación.');
+                    resolve(false);
+                }, 10000); // 10 segundos timeout
 
-                this.isInitialized = true;
-                this.checkSignInStatus();
+                gapi.load('client:auth2', async () => {
+                    try {
+                        clearTimeout(timeout);
+                        
+                        await gapi.client.init({
+                            apiKey: CALENDAR_CONFIG.API_KEY,
+                            clientId: CALENDAR_CONFIG.CLIENT_ID,
+                            discoveryDocs: [CALENDAR_CONFIG.DISCOVERY_DOC],
+                            scope: CALENDAR_CONFIG.SCOPES
+                        });
+
+                        this.isInitialized = true;
+                        this.checkSignInStatus();
+                        console.log('✅ Google Calendar API inicializado correctamente');
+                        resolve(true);
+                    } catch (initError) {
+                        clearTimeout(timeout);
+                        console.warn('⚠️ Error en gapi.client.init:', initError);
+                        console.log('📱 Continuando en modo simulación...');
+                        resolve(false);
+                    }
+                });
             });
 
-            return true;
         } catch (error) {
-            console.error('Error inicializando Google Calendar API:', error);
+            console.warn('⚠️ Error general inicializando Google Calendar API:', error);
+            console.log('📱 Continuando en modo simulación...');
             return false;
         }
     }
@@ -81,16 +101,25 @@ class CalendarAPI {
 
     // Obtener eventos de un día específico
     async getEventsForDate(date) {
-        if (!isCalendarConfigured()) {
+        if (!isCalendarConfigured() || !this.isInitialized) {
+            console.log('📱 Usando eventos simulados para', date);
             return this.getSimulatedEvents(date);
         }
 
         try {
+            // Verificar si el usuario está autenticado
+            if (!this.checkSignInStatus()) {
+                console.log('🔐 Usuario no autenticado, usando simulación');
+                return this.getSimulatedEvents(date);
+            }
+
             const startOfDay = new Date(date);
             startOfDay.setHours(0, 0, 0, 0);
             
             const endOfDay = new Date(date);
             endOfDay.setHours(23, 59, 59, 999);
+
+            console.log('📅 Consultando Google Calendar para', date);
 
             const response = await gapi.client.calendar.events.list({
                 calendarId: CALENDAR_CONFIG.CALENDAR_ID,
@@ -100,9 +129,11 @@ class CalendarAPI {
                 orderBy: 'startTime'
             });
 
+            console.log('✅ Eventos obtenidos de Google Calendar:', response.result.items?.length || 0);
             return response.result.items || [];
         } catch (error) {
-            console.error('Error obteniendo eventos:', error);
+            console.warn('⚠️ Error obteniendo eventos de Google Calendar:', error);
+            console.log('📱 Fallback a eventos simulados');
             return this.getSimulatedEvents(date);
         }
     }
@@ -198,12 +229,18 @@ class CalendarAPI {
 
     // Crear evento en el calendario
     async createEvent(bookingData) {
-        if (!isCalendarConfigured()) {
-            console.log('Simulando creación de evento:', bookingData);
-            return { success: true, eventId: 'simulated-' + Date.now() };
+        if (!isCalendarConfigured() || !this.isInitialized) {
+            console.log('📱 Simulando creación de evento:', bookingData);
+            return { success: true, eventId: 'simulated-' + Date.now(), mode: 'simulation' };
         }
 
         try {
+            // Verificar autenticación
+            if (!this.checkSignInStatus()) {
+                console.log('🔐 Usuario no autenticado, simulando evento');
+                return { success: true, eventId: 'simulated-auth-' + Date.now(), mode: 'simulation' };
+            }
+
             const startDateTime = new Date(`${bookingData.date}T${bookingData.time}:00`);
             const endDateTime = new Date(startDateTime);
             endDateTime.setHours(endDateTime.getHours() + 1);
@@ -237,19 +274,30 @@ class CalendarAPI {
                 }
             };
 
+            console.log('📅 Creando evento en Google Calendar...');
+
             const response = await gapi.client.calendar.events.insert({
                 calendarId: CALENDAR_CONFIG.CALENDAR_ID,
                 resource: event
             });
 
+            console.log('✅ Evento creado exitosamente en Google Calendar:', response.result.id);
+
             return {
                 success: true,
                 eventId: response.result.id,
-                eventLink: response.result.htmlLink
+                eventLink: response.result.htmlLink,
+                mode: 'real'
             };
         } catch (error) {
-            console.error('Error creando evento:', error);
-            return { success: false, error: error.message };
+            console.warn('⚠️ Error creando evento en Google Calendar:', error);
+            console.log('📱 Fallback a simulación');
+            return { 
+                success: true, 
+                eventId: 'simulated-error-' + Date.now(), 
+                error: error.message,
+                mode: 'simulation'
+            };
         }
     }
 

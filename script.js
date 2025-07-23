@@ -309,7 +309,10 @@ function checkReturnFromPayment() {
 // Event Listeners
 document.addEventListener('DOMContentLoaded', async function() {
     // Inicializar Google Calendar API
-    await calendarAPI.init();
+    const calendarInitialized = await calendarAPI.init();
+    
+    // Configurar botón de autenticación si es necesario
+    setupAuthButton(calendarInitialized);
     
     // Verificar retorno de pago
     checkReturnFromPayment();
@@ -472,6 +475,51 @@ function clearTimeSlots() {
     
     timeSelect.innerHTML = '<option value="">Primero selecciona una fecha</option>';
     availabilityInfo.style.display = 'none';
+}
+
+// Configurar botón de autenticación
+function setupAuthButton(calendarInitialized) {
+    const authButton = document.getElementById('authButton');
+    const calendarAuthInfo = document.getElementById('calendarAuthInfo');
+    
+    if (authButton) {
+        authButton.addEventListener('click', async function() {
+            try {
+                this.disabled = true;
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando...';
+                
+                const success = await calendarAPI.signIn();
+                
+                if (success) {
+                    this.innerHTML = '<i class="fas fa-check"></i> Conectado';
+                    this.style.background = '#4CAF50';
+                    setTimeout(() => {
+                        calendarAuthInfo.style.display = 'none';
+                    }, 2000);
+                } else {
+                    this.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                    this.style.background = '#f44336';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fab fa-google"></i> Reintentar';
+                        this.style.background = '#4285F4';
+                        this.disabled = false;
+                    }, 3000);
+                }
+            } catch (error) {
+                console.error('Error en autenticación:', error);
+                this.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                this.style.background = '#f44336';
+            }
+        });
+    }
+    
+    // Mostrar botón si Google Calendar está configurado pero no autenticado
+    if (isCalendarConfigured() && calendarInitialized && !calendarAPI.isSignedIn) {
+        console.log('📅 Google Calendar configurado pero no autenticado. Mostrando botón de login.');
+        if (calendarAuthInfo) {
+            calendarAuthInfo.style.display = 'block';
+        }
+    }
 }
 
 // Función para testing de la página de éxito

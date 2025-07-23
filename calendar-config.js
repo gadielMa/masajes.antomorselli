@@ -8,13 +8,13 @@
 
 const CALENDAR_CONFIG = {
     // API Key de Google Calendar (pública, segura para frontend)
-    API_KEY: 'TU_API_KEY_AQUI', // Reemplazar con la API Key real
+    API_KEY: 'AIzaSyAcqD9F9ghAAtQ3dgmHheWIYzVEdhqo3Cc', // Reemplazar con la API Key real
     
     // Client ID para OAuth 2.0
-    CLIENT_ID: 'TU_CLIENT_ID_AQUI', // Reemplazar con el Client ID real
+    CLIENT_ID: '1070397058047-24s5qj4hmkl6ia3dvf4hpoqbifaa9aan.apps.googleusercontent.com', // Reemplazar con el Client ID real
     
     // ID del calendario de Antonella (su email de Google)
-    CALENDAR_ID: 'antonella@gmail.com', // Reemplazar con el email real de Antonella
+    CALENDAR_ID: 'gadiel.malagrino@gmail.com', // Reemplazar con el email real de Antonella
     
     // Configuración de horarios de trabajo
     WORKING_HOURS: {
