@@ -1,24 +1,74 @@
 // Configuración de fechas válidas (Lunes a Viernes)
 function isValidDate(date) {
-    const day = date.getDay();
+    // Crear nueva fecha con hora específica para evitar problemas de zona horaria
+    const localDate = new Date(date.toISOString().split('T')[0] + 'T12:00:00');
+    const day = localDate.getDay();
     return day >= 1 && day <= 5; // 1=Lunes, 5=Viernes
 }
 
 // Configurar fecha mínima (hoy) y validar días de la semana
 function setupDateValidation() {
-    const dateInput = document.getElementById('date');
-    // Fecha mínima: 23/7/2025
-    const minDate = '2025-07-23';
-    dateInput.min = minDate;
+    // Configurar el input personalizado con Flatpickr
+    setupCustomDatePicker();
     
-    // Validar cuando cambia la fecha
-    dateInput.addEventListener('change', function() {
-        const selectedDate = new Date(this.value);
-        if (!isValidDate(selectedDate)) {
-            alert('Solo se pueden reservar citas de lunes a viernes.');
-            this.value = '';
+}
+
+// Función helper para obtener la fecha seleccionada
+function getSelectedDate() {
+    const dateInput = document.getElementById('date');
+    return dateInput.getAttribute('data-date') || '';
+}
+
+// Configurar el date picker personalizado con Flatpickr
+function setupCustomDatePicker() {
+    const dateInput = document.getElementById('date');
+    
+    // Configurar fecha mínima (hoy)
+    const today = new Date();
+    const minDate = today.toISOString().split('T')[0];
+    
+    // Configurar Flatpickr
+    const fp = flatpickr(dateInput, {
+        locale: "es",
+        dateFormat: "Y-m-d",
+        minDate: minDate,
+        disableMobile: true, // Usar siempre la versión desktop
+        allowInput: false,
+        clickOpens: true,
+        
+        // Formato de visualización
+        altInput: true,
+        altFormat: "l, j \\de F \\de Y", // "lunes, 28 de julio de 2025"
+        
+        // Personalización
+        prevArrow: '<i class="fas fa-chevron-left"></i>',
+        nextArrow: '<i class="fas fa-chevron-right"></i>',
+        
+        // Callback cuando cambia la fecha
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length > 0) {
+                // Guardar la fecha seleccionada
+                dateInput.setAttribute('data-date', dateStr);
+                
+                // Cargar horarios disponibles
+                loadAvailableTimeSlots(dateStr);
+            }
+        },
+        
+        // Callback cuando se abre el calendario
+        onOpen: function(selectedDates, dateStr, instance) {
+            // Agregar clase para personalización adicional
+            instance.calendarContainer.classList.add('flatpickr-custom');
         }
     });
+    
+    // Hacer que el icono también abra el picker
+    const dateIcon = document.querySelector('.date-icon');
+    if (dateIcon) {
+        dateIcon.addEventListener('click', function() {
+            fp.open();
+        });
+    }
 }
 
 // Obtener precio según el servicio
@@ -45,7 +95,7 @@ function validateForm() {
     const name = document.getElementById('name').value.trim();
     const dni = document.getElementById('dni').value.trim();
     const service = document.getElementById('service').value;
-    const date = document.getElementById('date').value;
+    const date = getSelectedDate();
     const time = document.getElementById('time').value;
     
     if (!name || !dni || !service || !date || !time) {
@@ -65,19 +115,22 @@ function validateForm() {
         return false;
     }
     
-    // Validar fecha mínima
+    // Validar fecha mínima (no permitir fechas pasadas)
     const selectedDate = new Date(date);
-    const minDate = new Date('2025-07-23');
-    if (selectedDate < minDate) {
-        alert('La fecha debe ser a partir del 23/7/2025.');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Resetear horas para comparar solo fechas
+    selectedDate.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+        alert('No se pueden reservar citas en fechas pasadas.');
         return false;
     }
     
-    // Validar fecha
-    if (!isValidDate(selectedDate)) {
-        alert('Solo se pueden reservar citas de lunes a viernes.');
-        return false;
-    }
+    // Validar fecha - ya no bloqueamos sábados/domingos, solo verificamos disponibilidad
+    // if (!isValidDate(selectedDate)) {
+    //     alert('Solo se pueden reservar citas de lunes a viernes.');
+    //     return false;
+    // }
     
     return true;
 }
@@ -101,7 +154,7 @@ function showPaymentModal() {
     const name = document.getElementById('name').value;
     const dni = document.getElementById('dni').value;
     const service = document.getElementById('service').value;
-    const date = document.getElementById('date').value;
+    const date = getSelectedDate();
     const time = document.getElementById('time').value;
     
     const formattedDate = formatDate(date);
@@ -136,7 +189,7 @@ function saveBookingData() {
         name: document.getElementById('name').value,
         dni: document.getElementById('dni').value,
         service: document.getElementById('service').value,
-        date: document.getElementById('date').value,
+        date: getSelectedDate(),
         time: document.getElementById('time').value,
         timestamp: new Date().toISOString()
     };
@@ -145,61 +198,103 @@ function saveBookingData() {
 }
 
 // Procesar pago con Mercado Pago
-function processMercadoPago() {
-    // Guardar datos de la reserva antes de redirigir
-    saveBookingData();
-    
-    const mercadoPagoUrl = envLoader.get('MERCADOPAGO_LINK') || 'https://mpago.la/tu_link_aqui';
-    
-    // Redirigir a Mercado Pago
-    window.location.href = mercadoPagoUrl;
-}
-
-// Procesar transferencia bancaria
-function processBankTransfer() {
-    const service = document.getElementById('service').value;
-    const price = getServicePrice(service);
-    
-    const bankName = envLoader.get('BANK_NAME') || 'Banco';
-    const bankCBU = envLoader.get('BANK_CBU') || 'CBU_NO_CONFIGURADO';
-    const bankOwner = envLoader.get('BANK_OWNER') || 'Titular';
-    
-    alert(`Por favor, realiza la transferencia a:\n\nBanco ${bankName}\nCBU: ${bankCBU}\nTitular: ${bankOwner}\nMonto: ${formatPrice(price)}\n\nEnvía el comprobante por WhatsApp a Antonella para confirmar tu reserva.`);
-    
-    // Después de mostrar los datos, proceder con WhatsApp
-    setTimeout(() => {
-        const confirmed = confirm('¿Has realizado la transferencia bancaria?');
-        if (confirmed) {
-            processSuccessfulPayment();
-        }
-    }, 1000);
-}
-
-// Procesar pago exitoso
-async function processSuccessfulPayment() {
-    closeModal();
-    
+async function processMercadoPago() {
     try {
+        // Mostrar loading
+        const mercadoPagoBtn = document.querySelector('[onclick="processMercadoPago()"]');
+        const originalText = mercadoPagoBtn.textContent;
+        mercadoPagoBtn.textContent = 'Reservando...';
+        mercadoPagoBtn.disabled = true;
+        
         // Obtener datos de la reserva
+        const selectedDate = getSelectedDate();
+        console.log('📅 Fecha seleccionada:', selectedDate);
+        
+        // Validar datos obligatorios
+        if (!selectedDate) {
+            console.error('❌ No hay fecha seleccionada');
+            alert('Por favor selecciona una fecha.');
+            mercadoPagoBtn.textContent = originalText;
+            mercadoPagoBtn.disabled = false;
+            return;
+        }
+        
         const bookingData = {
             name: document.getElementById('name').value,
             dni: document.getElementById('dni').value,
             service: document.getElementById('service').value,
-            date: document.getElementById('date').value,
+            date: selectedDate,
             time: document.getElementById('time').value
         };
         
-        // Crear evento en Google Calendar
-        const calendarResult = await calendarAPI.createEvent(bookingData);
+        // Verificar que calendarAPI esté disponible
+        if (!window.calendarAPI) {
+            console.error('❌ window.calendarAPI no está disponible');
+            alert('Sistema de calendario no disponible. Por favor recarga la página e intenta nuevamente.');
+            
+            // Restaurar botón
+            mercadoPagoBtn.textContent = originalText;
+            mercadoPagoBtn.disabled = false;
+            return;
+        }
+
+        // Crear evento en Google Calendar ANTES de ir a Mercado Pago
+        console.log('Creando evento en calendario antes del pago...');
+        console.log('Datos de la reserva:', bookingData);
+        
+        const calendarResult = await window.calendarAPI.createEvent(bookingData);
         
         if (calendarResult.success) {
-            console.log('Evento creado en calendario:', calendarResult.eventId);
+            console.log('✅ Evento procesado:', calendarResult.eventId, `(${calendarResult.mode})`);
+            
+            // Guardar datos de la reserva
+            saveBookingData();
+            
+            // Obtener URL de Mercado Pago
+            const mercadoPagoUrl = envLoader.get('MERCADOPAGO_LINK') || 'https://mpago.la/1g2H3k4J5L';
+            
+            // Mostrar mensaje según el modo
+            if (calendarResult.mode === 'simulation') {
+                console.log('📱 Evento simulado - continuando con pago');
+            }
+            
+            // Redirigir a Mercado Pago
+            window.location.href = mercadoPagoUrl;
+            
         } else {
-            console.warn('No se pudo crear el evento en calendario:', calendarResult.error);
+            console.error('❌ Error creando evento:', calendarResult.error);
+            alert('No se pudo procesar la reserva. Por favor intenta nuevamente o contacta a Antonella directamente.');
+            
+            // Restaurar botón
+            mercadoPagoBtn.textContent = originalText;
+            mercadoPagoBtn.disabled = false;
         }
         
-        // Mostrar mensaje de éxito
-        alert('¡Pago realizado con éxito! Tu reserva ha sido confirmada. Se enviará un mensaje de WhatsApp a Antonella.');
+    } catch (error) {
+        console.error('❌ Error en processMercadoPago:', error);
+        console.error('❌ Stack trace:', error.stack);
+        console.error('❌ Error message:', error.message);
+        
+        alert(`Hubo un problema al procesar la reserva: ${error.message}. Por favor intenta nuevamente.`);
+        
+        // Restaurar botón
+        const mercadoPagoBtn = document.querySelector('[onclick="processMercadoPago()"]');
+        if (mercadoPagoBtn) {
+            mercadoPagoBtn.textContent = 'Pagar con Mercado Pago';
+            mercadoPagoBtn.disabled = false;
+        }
+    }
+}
+
+
+
+// Procesar pago exitoso
+function processSuccessfulPayment() {
+    closeModal();
+    
+    try {
+        // Mostrar mensaje de éxito (el evento ya se creó antes del pago)
+        alert('¡Pago realizado con éxito! Tu reserva ya está confirmada en el calendario. Se enviará un mensaje de WhatsApp a Antonella.');
         
         // Enviar WhatsApp
         sendWhatsApp();
@@ -209,8 +304,8 @@ async function processSuccessfulPayment() {
         clearTimeSlots();
         
     } catch (error) {
-        console.error('Error procesando pago:', error);
-        alert('Pago realizado, pero hubo un problema al procesar la reserva. Por favor contacta a Antonella directamente.');
+        console.error('Error procesando pago exitoso:', error);
+        alert('Pago realizado con éxito. Tu cita ya está reservada.');
         sendWhatsApp();
     }
 }
@@ -220,7 +315,7 @@ function sendWhatsApp() {
     const name = document.getElementById('name').value;
     const dni = document.getElementById('dni').value;
     const service = document.getElementById('service').value;
-    const date = document.getElementById('date').value;
+    const date = getSelectedDate();
     const time = document.getElementById('time').value;
     
     // Formatear fecha para WhatsApp
@@ -310,13 +405,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     await envLoader.loadEnv();
     
     // Actualizar UI con datos bancarios
-    updateBankInfo();
+
     
     // Inicializar Google Calendar API
-    const calendarInitialized = await calendarAPI.init();
+            const calendarInitialized = await window.calendarAPI.init();
     
     // Configurar botón de autenticación si es necesario
-    setupAuthButton(calendarInitialized);
+    // setupAuthButton(calendarInitialized); // Botón eliminado
     
     // Verificar retorno de pago
     checkReturnFromPayment();
@@ -336,9 +431,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Botón de pago
     document.getElementById('payButton').addEventListener('click', showPaymentModal);
     
-    // Botones del modal
+        // Botones del modal
     document.getElementById('mercadoPagoBtn').addEventListener('click', processMercadoPago);
-    document.getElementById('transferBtn').addEventListener('click', processBankTransfer);
     
     // Cerrar modal
     document.querySelector('.close').addEventListener('click', closeModal);
@@ -424,7 +518,7 @@ async function loadAvailableTimeSlots(date) {
         timeSelect.disabled = true;
         
         // Obtener horarios disponibles
-        const availableSlots = await calendarAPI.getAvailableSlots(date);
+        const availableSlots = await window.calendarAPI.getAvailableSlots(date);
         
         // Limpiar opciones
         timeSelect.innerHTML = '<option value="">Selecciona un horario</option>';
@@ -481,60 +575,12 @@ function clearTimeSlots() {
     availabilityInfo.style.display = 'none';
 }
 
-// Actualizar información bancaria en la UI
-function updateBankInfo() {
-    const bankNameEl = document.getElementById('bankName');
-    const bankCBUEl = document.getElementById('bankCBU');
-    const bankOwnerEl = document.getElementById('bankOwner');
-    
-    if (bankNameEl) bankNameEl.textContent = envLoader.get('BANK_NAME') || 'No configurado';
-    if (bankCBUEl) bankCBUEl.textContent = envLoader.get('BANK_CBU') || 'No configurado';
-    if (bankOwnerEl) bankOwnerEl.textContent = envLoader.get('BANK_OWNER') || 'No configurado';
-}
 
-// Configurar botón de autenticación
+
+// Configurar botón de autenticación - FUNCIÓN DESHABILITADA
 function setupAuthButton(calendarInitialized) {
-    const authButton = document.getElementById('authButton');
-    const calendarAuthInfo = document.getElementById('calendarAuthInfo');
-    
-    if (authButton) {
-        authButton.addEventListener('click', async function() {
-            try {
-                this.disabled = true;
-                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando...';
-                
-                const success = await calendarAPI.signIn();
-                
-                if (success) {
-                    this.innerHTML = '<i class="fas fa-check"></i> Conectado';
-                    this.style.background = '#4CAF50';
-                    setTimeout(() => {
-                        calendarAuthInfo.style.display = 'none';
-                    }, 2000);
-                } else {
-                    this.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
-                    this.style.background = '#f44336';
-                    setTimeout(() => {
-                        this.innerHTML = '<i class="fab fa-google"></i> Reintentar';
-                        this.style.background = '#4285F4';
-                        this.disabled = false;
-                    }, 3000);
-                }
-            } catch (error) {
-                console.error('Error en autenticación:', error);
-                this.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
-                this.style.background = '#f44336';
-            }
-        });
-    }
-    
-    // Mostrar botón si Google Calendar está configurado pero no autenticado
-    if (isCalendarConfigured() && calendarInitialized && !calendarAPI.isSignedIn) {
-        console.log('📅 Google Calendar configurado pero no autenticado. Mostrando botón de login.');
-        if (calendarAuthInfo) {
-            calendarAuthInfo.style.display = 'block';
-        }
-    }
+    // Botón eliminado de la interfaz - función deshabilitada
+    return;
 }
 
 // Función para testing de la página de éxito
@@ -594,21 +640,19 @@ function setupRealTimeValidation() {
     // Validación de fecha en tiempo real
     dateInput.addEventListener('change', async function() {
         const selectedDate = new Date(this.value);
-        const minDate = new Date('2025-07-23');
+        const today = new Date();
+        const minDate = new Date(today.toISOString().split('T')[0]);
         
         if (selectedDate < minDate) {
             this.style.borderColor = '#f44336';
-            this.setCustomValidity('La fecha debe ser a partir del 23/7/2025');
-            clearTimeSlots();
-        } else if (!isValidDate(selectedDate)) {
-            this.style.borderColor = '#f44336';
-            this.setCustomValidity('Solo se pueden reservar citas de lunes a viernes');
+            this.setCustomValidity('No se pueden reservar citas en fechas pasadas');
             clearTimeSlots();
         } else {
+            // Ya no validamos días laborables aquí - dejamos que el sistema maneje la disponibilidad
             this.style.borderColor = '#8B4B6B';
             this.setCustomValidity('');
             // Cargar horarios disponibles
-            await loadAvailableTimeSlots(this.value);
+            loadAvailableTimeSlots(this.value);
         }
     });
     

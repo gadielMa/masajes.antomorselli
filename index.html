@@ -7,11 +7,9 @@
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     
-    <!-- Google Calendar Integration -->
-    <script src="env-loader.js"></script>
-    <script src="calendar-config.js"></script>
-    <script src="calendar-api.js"></script>
+    <!-- Google Calendar Integration se carga al final del body -->
 </head>
 <body>
     <!-- Header -->
@@ -194,8 +192,10 @@
                         
                         <div class="form-group">
                             <label for="date">Fecha</label>
-                            <input type="date" id="date" name="date" required>
-                            <small>Solo lunes a viernes, desde 23/7/2025</small>
+                            <div class="custom-date-picker">
+                                <input type="text" id="date" name="date" required readonly placeholder="Seleccionar fecha">
+                                <i class="fas fa-calendar-alt date-icon"></i>
+                            </div>
                         </div>
                         
                         <div class="form-group">
@@ -206,13 +206,7 @@
                             <div id="availabilityInfo" class="availability-info" style="display: none;">
                                 <span id="availableCount"></span>
                             </div>
-                            <div id="calendarAuthInfo" class="calendar-auth-info" style="display: none;">
-                                <button id="authButton" class="auth-button">
-                                    <i class="fab fa-google"></i>
-                                    Conectar con Google Calendar
-                                </button>
-                                <small>Para acceso completo al calendario de Antonella</small>
-                            </div>
+
                         </div>
                         
                         <button type="button" id="payButton" class="pay-button">
@@ -230,22 +224,13 @@
                             <i class="fas fa-credit-card"></i>
                             <span>Mercado Pago</span>
                         </div>
-                        <div class="payment-item">
-                            <i class="fas fa-university"></i>
-                            <span>Transferencia Bancaria</span>
-                        </div>
+
                         <div class="payment-item">
                             <i class="fas fa-clock"></i>
                             <span>Horarios: L-V 14:00-17:00</span>
                         </div>
                     </div>
-                    
-                    <div class="bank-info">
-                        <h4>Datos Bancarios</h4>
-                        <p><strong>Banco:</strong> <span id="bankName">Cargando...</span></p>
-                        <p><strong>CBU:</strong> <span id="bankCBU">Cargando...</span></p>
-                        <p><strong>Titular:</strong> <span id="bankOwner">Cargando...</span></p>
-                    </div>
+
                 </div>
             </div>
         </div>
@@ -299,14 +284,16 @@
                     <i class="fas fa-credit-card"></i>
                     Pagar con Mercado Pago
                 </button>
-                <button id="transferBtn" class="payment-option">
-                    <i class="fas fa-university"></i>
-                    Transferencia Bancaria
-                </button>
+
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
+    <script src="env-loader.js"></script>
+    <script src="calendar-config.js"></script>
+    <script src="calendar-api.js"></script>
     <script src="script.js"></script>
 </body>
 </html> 

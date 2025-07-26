@@ -176,17 +176,18 @@ body {
     display: inline-block;
     background: linear-gradient(135deg, #8B4B6B, #a56082);
     color: white;
-    padding: 1rem 2rem;
+    padding: 1.5rem 3rem;
     text-decoration: none;
     border-radius: 50px;
     font-weight: 600;
+    font-size: 1.2rem;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 15px rgba(139, 75, 107, 0.3);
+    box-shadow: 0 6px 20px rgba(139, 75, 107, 0.4);
 }
 
 .cta-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(139, 75, 107, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(139, 75, 107, 0.5);
 }
 
 .hero-image {
@@ -445,6 +446,120 @@ body {
     transition: border-color 0.3s ease;
 }
 
+/* Input de fecha personalizado con Flatpickr */
+.custom-date-picker {
+    position: relative;
+    width: 100%;
+}
+
+.custom-date-picker input[type="text"] {
+    width: 100%;
+    padding: 1rem 3rem 1rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    cursor: pointer;
+    background: white;
+    transition: border-color 0.3s ease;
+}
+
+.custom-date-picker input[type="text"]:focus {
+    outline: none;
+    border-color: #8B4B6B;
+}
+
+.custom-date-picker .date-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8B4B6B;
+    font-size: 1.2rem;
+    cursor: pointer;
+    pointer-events: none;
+}
+
+.custom-date-picker input[type="text"]:hover {
+    border-color: #8B4B6B;
+}
+
+/* Personalizar Flatpickr */
+.flatpickr-calendar {
+    font-family: 'Poppins', sans-serif !important;
+    border-radius: 15px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+    border: none !important;
+    font-size: 14px !important;
+}
+
+.flatpickr-calendar.open {
+    z-index: 9999 !important;
+}
+
+.flatpickr-months {
+    background: linear-gradient(135deg, #8B4B6B, #a56082) !important;
+    border-radius: 15px 15px 0 0 !important;
+}
+
+.flatpickr-current-month {
+    color: white !important;
+}
+
+.flatpickr-weekdays {
+    background: #f8f9fa !important;
+}
+
+.flatpickr-weekday {
+    color: #8B4B6B !important;
+    font-weight: 600 !important;
+}
+
+.flatpickr-day {
+    border-radius: 8px !important;
+    margin: 2px !important;
+    font-weight: 500 !important;
+}
+
+.flatpickr-day:hover {
+    background: #8B4B6B !important;
+    border-color: #8B4B6B !important;
+    color: white !important;
+}
+
+.flatpickr-day.selected {
+    background: #8B4B6B !important;
+    border-color: #8B4B6B !important;
+    color: white !important;
+}
+
+.flatpickr-day.today {
+    border-color: #8B4B6B !important;
+    color: #8B4B6B !important;
+}
+
+.flatpickr-prev-month,
+.flatpickr-next-month {
+    color: white !important;
+}
+
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover {
+    color: #f0f0f0 !important;
+}
+
+/* Mantener el select de tipo de masaje con el estilo original */
+.form-group select {
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+/* Asegurar que todos los inputs tengan el mismo tamaño */
+.form-group input:not(.custom-date-picker input) {
+    font-size: 1rem;
+    padding: 1rem;
+}
+
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
@@ -604,22 +719,7 @@ body {
     width: 20px;
 }
 
-.bank-info {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 10px;
-    border-left: 4px solid #8B4B6B;
-}
 
-.bank-info h4 {
-    color: #2c3e50;
-    margin-bottom: 1rem;
-}
-
-.bank-info p {
-    margin-bottom: 0.5rem;
-    color: #666;
-}
 
 /* Modal */
 .modal {

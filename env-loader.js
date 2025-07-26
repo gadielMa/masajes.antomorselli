@@ -21,14 +21,16 @@ class EnvLoader {
     // Variables para producción (GitHub Pages)
     loadProductionEnv() {
         this.env = {
+            // 📅 Google Calendar - CONFIGURAR CON TUS CREDENCIALES REALES
             GOOGLE_API_KEY: 'TU_API_KEY_AQUI',
             GOOGLE_CLIENT_ID: 'TU_CLIENT_ID_AQUI.apps.googleusercontent.com',
-            GOOGLE_CALENDAR_ID: 'tu_email@gmail.com',
-            MERCADOPAGO_LINK: 'https://mpago.la/tu_link_aqui',
-            WHATSAPP_PHONE: '54911xxxxxxxx',
-            BANK_NAME: 'Tu_Banco',
-            BANK_CBU: 'tu_cbu_aqui',
-            BANK_OWNER: 'Tu Nombre Completo'
+            GOOGLE_CALENDAR_ID: '0d0646b01e85b3ff948744102e2feaa09677224064e14864689a26f0eb27e246@group.calendar.google.com',
+            
+            // 💳 Mercado Pago
+            MERCADOPAGO_LINK: 'https://mpago.la/1zvBGJ7',
+            
+            // 📱 WhatsApp
+            WHATSAPP_PHONE: '5491140691400'
         };
         console.log('🌍 Variables de producción cargadas');
         return true;
@@ -68,23 +70,26 @@ class EnvLoader {
             const [key, ...valueParts] = line.split('=');
             const value = valueParts.join('=').trim();
             
-            if (key && value) {
-                this.env[key] = value;
-            }
+                            if (key && value) {
+                    // Limpiar saltos de línea y espacios extras
+                    this.env[key] = value.replace(/\n/g, '').replace(/\r/g, '').trim();
+                }
         });
     }
 
     // Variables por defecto (fallback)
     loadDefaultEnv() {
         this.env = {
+            // 📅 Google Calendar - CONFIGURAR CON TUS CREDENCIALES REALES
             GOOGLE_API_KEY: 'TU_API_KEY_AQUI',
-            GOOGLE_CLIENT_ID: 'TU_CLIENT_ID_AQUI',
-            GOOGLE_CALENDAR_ID: 'tu_email@gmail.com',
-            MERCADOPAGO_LINK: 'https://mpago.la/tu_link_aqui',
-            WHATSAPP_PHONE: '54911xxxxxxxx',
-            BANK_NAME: 'Tu_Banco',
-            BANK_CBU: 'tu_cbu_aqui',
-            BANK_OWNER: 'Tu Nombre'
+            GOOGLE_CLIENT_ID: 'TU_CLIENT_ID_AQUI.apps.googleusercontent.com',
+            GOOGLE_CALENDAR_ID: 'CLAVE_AQUI@group.calendar.google.com',
+            
+            // 💳 Mercado Pago
+            MERCADOPAGO_LINK: 'https://mpago.la/1zvBGJ7',
+            
+            // 📱 WhatsApp
+            WHATSAPP_PHONE: '5491140691400'
         };
         console.log('🔧 Variables por defecto cargadas');
         return false;

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendario - Masajes Antonella Morselli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8B4B6B, #a56082);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(139, 75, 107, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .calendar-controls {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .date-picker {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .date-picker label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .date-picker input {
+            padding: 0.8rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(135deg, #8B4B6B, #a56082);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            color: #8B4B6B;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card p {
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .events-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .events-header {
+            background: linear-gradient(135deg, #8B4B6B, #a56082);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .events-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .events-header #eventCount {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .events-list {
+            padding: 2rem;
+        }
+
+        .event-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-left: 4px solid #8B4B6B;
+            background: #f8f9fa;
+            margin-bottom: 1rem;
+            border-radius: 0 10px 10px 0;
+            transition: transform 0.3s ease;
+        }
+
+        .event-item:hover {
+            transform: translateX(5px);
+        }
+
+        .event-info h4 {
+            color: #2c3e50;
+            margin-bottom: 0.3rem;
+        }
+
+        .event-info p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .event-time {
+            background: #8B4B6B;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .all-day-event {
+            border-left-color: #28a745;
+        }
+
+        .all-day-event .event-time {
+            background: #28a745;
+        }
+
+        .no-events {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .no-events i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #8B4B6B;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #dc3545;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #8B4B6B;
+            border: none;
+            padding: 1rem;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .calendar-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .date-picker {
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .event-item {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="window.location.href='/'" title="Volver al inicio">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+
+    <div class="header">
+        <h1><i class="fas fa-calendar-alt"></i> Panel de Calendario</h1>
+        <p>Gestión de citas - Masajes Antonella Morselli</p>
+    </div>
+
+    <div class="container">
+        <div class="calendar-controls">
+            <div class="date-picker">
+                <label for="selectedDate">Ver fecha:</label>
+                <input type="date" id="selectedDate" value="">
+            </div>
+            <button class="refresh-btn" onclick="loadCalendarData()">
+                <i class="fas fa-sync-alt"></i>
+                Actualizar
+            </button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="todayEvents">-</h3>
+                <p>Citas Hoy</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="selectedDateEvents">-</h3>
+                <p>Citas Fecha Seleccionada</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="weekEvents">-</h3>
+                <p>Citas Esta Semana</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="availableSlots">-</h3>
+                <p>Horarios Disponibles Hoy</p>
+            </div>
+        </div>
+
+        <div class="events-container">
+            <div class="events-header">
+                <h2><i class="fas fa-list"></i> Eventos del <span id="displayDate">Hoy</span></h2>
+                <span id="eventCount">0 eventos</span>
+            </div>
+            <div class="events-list" id="eventsList">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Cargando eventos...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/env-loader.js"></script>
+    <script src="/calendar-config.js"></script>
+    <script src="/calendar-api.js"></script>
+    <script>
+        let calendarAPI;
+
+        // Inicializar la página
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Configurar fecha por defecto (hoy)
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('selectedDate').value = today;
+                
+                // Inicializar API del calendario
+                calendarAPI = new CalendarAPI();
+                await calendarAPI.init();
+
+                // Cargar datos iniciales
+                await loadCalendarData();
+
+                // Configurar listeners
+                document.getElementById('selectedDate').addEventListener('change', loadCalendarData);
+                
+            } catch (error) {
+                console.error('Error inicializando calendario:', error);
+                showError(error.message || 'Error de inicialización');
+            }
+        });
+
+        // Cargar datos del calendario
+        async function loadCalendarData() {
+            const selectedDate = document.getElementById('selectedDate').value;
+            const today = new Date().toISOString().split('T')[0];
+
+            try {
+                // Mostrar loading
+                showLoading();
+
+                // Obtener eventos del día seleccionado
+                const selectedEvents = await calendarAPI.getEventsForDate(selectedDate);
+                
+                // Obtener eventos de hoy (si es diferente)
+                const todayEvents = selectedDate === today ? selectedEvents : await calendarAPI.getEventsForDate(today);
+
+                // Obtener eventos de la semana
+                const weekEvents = await getWeekEvents();
+
+                // Obtener horarios disponibles de hoy
+                const availableToday = await calendarAPI.getAvailableSlots(today);
+
+                // Actualizar estadísticas
+                updateStats(todayEvents.length, selectedEvents.length, weekEvents, availableToday.length);
+
+                // Mostrar eventos
+                displayEvents(selectedEvents, selectedDate);
+
+            } catch (error) {
+                console.error('Error cargando datos del calendario:', error);
+                showError('Error al cargar el calendario. Verifica la configuración.');
+            }
+        }
+
+        // Obtener eventos de la semana
+        async function getWeekEvents() {
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Lunes
+
+            let weekCount = 0;
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                try {
+                    const events = await calendarAPI.getEventsForDate(dateStr);
+                    weekCount += events.length;
+                } catch (error) {
+                    console.warn('Error obteniendo eventos para', dateStr);
+                }
+            }
+            return weekCount;
+        }
+
+        // Actualizar estadísticas
+        function updateStats(todayCount, selectedCount, weekCount, availableCount) {
+            document.getElementById('todayEvents').textContent = todayCount;
+            document.getElementById('selectedDateEvents').textContent = selectedCount;
+            document.getElementById('weekEvents').textContent = weekCount;
+            document.getElementById('availableSlots').textContent = availableCount;
+        }
+
+        // Mostrar eventos
+        function displayEvents(events, date) {
+            const eventsList = document.getElementById('eventsList');
+            const displayDate = document.getElementById('displayDate');
+            const eventCount = document.getElementById('eventCount');
+
+            // Formatear fecha para mostrar
+            const dateObj = new Date(date + 'T12:00:00');
+            const dateStr = dateObj.toLocaleDateString('es-ES', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            displayDate.textContent = dateStr;
+            eventCount.textContent = `${events.length} evento${events.length !== 1 ? 's' : ''}`;
+
+            if (events.length === 0) {
+                eventsList.innerHTML = `
+                    <div class="no-events">
+                        <i class="fas fa-calendar-day"></i>
+                        <h3>No hay citas programadas</h3>
+                        <p>Este día está completamente libre</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Ordenar eventos por hora
+            events.sort((a, b) => {
+                const timeA = a.start.dateTime || a.start.date;
+                const timeB = b.start.dateTime || b.start.date;
+                return new Date(timeA) - new Date(timeB);
+            });
+
+            const eventsHTML = events.map(event => {
+                const isAllDay = !event.start.dateTime;
+                const startTime = isAllDay ? 'Todo el día' : formatTime(event.start.dateTime);
+                const endTime = isAllDay ? '' : formatTime(event.end.dateTime);
+                const timeDisplay = isAllDay ? 'Todo el día' : `${startTime} - ${endTime}`;
+
+                return `
+                    <div class="event-item ${isAllDay ? 'all-day-event' : ''}">
+                        <div class="event-info">
+                            <h4>${event.summary || 'Sin título'}</h4>
+                            <p><i class="fas fa-clock"></i> ${timeDisplay}</p>
+                            ${event.description ? `<p><i class="fas fa-info-circle"></i> ${event.description}</p>` : ''}
+                        </div>
+                        <div class="event-time">
+                            ${isAllDay ? 'TODO EL DÍA' : startTime}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            eventsList.innerHTML = eventsHTML;
+        }
+
+        // Formatear hora
+        function formatTime(dateTimeStr) {
+            const date = new Date(dateTimeStr);
+            return date.toLocaleTimeString('es-ES', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false
+            });
+        }
+
+        // Mostrar loading
+        function showLoading() {
+            document.getElementById('eventsList').innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Cargando eventos...</p>
+                </div>
+            `;
+        }
+
+        // Mostrar error
+        function showError(message) {
+            document.getElementById('eventsList').innerHTML = `
+                <div class="error">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Error:</strong> ${message}
+                </div>
+                <div class="no-events">
+                    <i class="fas fa-calendar-times"></i>
+                    <h3>No se pudieron cargar los eventos</h3>
+                    <p>Intenta refrescar la página</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html> 
