@@ -12,6 +12,7 @@
     <script src="env-loader.js"></script>
     <script src="calendar-config.js"></script>
     <script src="calendar-api.js"></script>
+    <script src="script.js"></script>
     <style>
         .success-page {
             min-height: 100vh;
@@ -381,21 +382,24 @@ DNI: ${bookingData.dni}
             }, 1000);
         }
 
-        // Crear evento en calendario
+        // Crear evento en calendario usando la función de script.js
         async function createCalendarEvent(bookingData) {
+            console.log('🔄 Creando evento en calendario después del pago exitoso...');
+            console.log('📋 Datos de la reserva:', bookingData);
+            
             try {
-                await calendarAPI.init();
-                const result = await calendarAPI.createEvent(bookingData);
+                // Usar la misma función que funciona en script.js
+                const result = await createRealCalendarEvent(bookingData);
                 
                 if (result.success) {
-                    console.log('✅ Evento creado en Google Calendar:', result.eventId);
+                    console.log('✅ Evento creado exitosamente:', result.eventId, `(${result.mode})`);
                     return result;
                 } else {
                     console.warn('⚠️ No se pudo crear evento en calendario:', result.error);
                     return result;
                 }
             } catch (error) {
-                console.error('❌ Error creando evento:', error);
+                console.error('❌ Error creando evento en exito.html:', error);
                 return { success: false, error: error.message };
             }
         }
@@ -408,8 +412,21 @@ DNI: ${bookingData.dni}
             const bookingData = loadBookingData();
             
             if (bookingData) {
-                // Crear evento en Google Calendar
-                createCalendarEvent(bookingData);
+                // Crear evento en Google Calendar después del pago
+                try {
+                    console.log('🚀 Iniciando creación de evento después del pago exitoso...');
+                    const calendarResult = await createCalendarEvent(bookingData);
+                    
+                    if (calendarResult.success) {
+                        console.log('🎉 ¡Turno confirmado en Google Calendar!');
+                    } else {
+                        console.error('⚠️ Evento no creado pero pago confirmado:', calendarResult.error);
+                        // El turno sigue siendo válido aunque no se haya creado en Calendar
+                    }
+                } catch (error) {
+                    console.error('❌ Error crítico creando evento:', error);
+                    // El turno sigue siendo válido aunque haya error
+                }
                 
                 // Configurar botón manual de WhatsApp
                 document.getElementById('sendWhatsAppBtn').addEventListener('click', function() {
