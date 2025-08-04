@@ -26,4 +26,25 @@ yarn-error.log*
 # 🔑 Credenciales y configuración local
 config.local.js
 credentials.json
-.credentials/ 
+.credentials/
+*.json
+service-account*.json
+intense-plate-*.json
+
+# 🚫 Archivos de testing y desarrollo
+test-*.html
+test-*.js
+debug-*.js
+*-test.html
+*-test.js
+
+# 📦 Backend y servidor
+calendar-server.js
+package.json
+package-lock.json
+start-servers.sh
+
+# 📊 Logs y datos temporales
+logs/
+*.log
+.vercel 

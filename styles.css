@@ -858,10 +858,382 @@ body {
         font-size: 8rem;
         margin-top: 2rem;
     }
+}
+
+/* Animación de pulse para confirmación de pago */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(139, 75, 107, 0.7);
+    }
+    
+    70% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 10px rgba(139, 75, 107, 0);
+    }
+    
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(139, 75, 107, 0);
+    }
+}
+
+/* Estilos para botones CTA */
+.cta-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.cta-button.secondary {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.cta-button.secondary:hover {
+    background: linear-gradient(135deg, #5a6268, #495057);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+}
+
+/* Estilos para modal de consulta de turnos */
+.appointment-lookup {
+    margin-bottom: 2rem;
+}
+
+/* Botón de búsqueda mejorado - Compatible con Safari */
+.search-button {
+    /* Fallback para Safari */
+    background: #20c997;
+    background: -webkit-linear-gradient(135deg, #20c997, #17a2b8);
+    background: linear-gradient(135deg, #20c997, #17a2b8);
+    color: white;
+    border: none;
+    padding: 1.2rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 30px; /* Menos redondeado para Safari */
+    cursor: pointer;
+    /* Transiciones más simples para Safari */
+    -webkit-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    gap: 0.8rem;
+    width: 100%;
+    margin-top: 1.5rem;
+    /* Sombras simplificadas para Safari */
+    -webkit-box-shadow: 0 6px 20px rgba(32, 201, 151, 0.3);
+    box-shadow: 0 6px 20px rgba(32, 201, 151, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-height: 60px;
+    /* Mejoras específicas para Safari */
+    -webkit-appearance: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Efecto hover simplificado para Safari */
+.search-button:hover {
+    background: #17a2b8;
+    background: -webkit-linear-gradient(135deg, #17a2b8, #138496);
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    -webkit-transform: translateY(-2px);
+    transform: translateY(-2px);
+    -webkit-box-shadow: 0 8px 25px rgba(23, 162, 184, 0.4);
+    box-shadow: 0 8px 25px rgba(23, 162, 184, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.search-button:active {
+    -webkit-transform: translateY(0px);
+    transform: translateY(0px);
+    -webkit-box-shadow: 0 4px 15px rgba(32, 201, 151, 0.4);
+    box-shadow: 0 4px 15px rgba(32, 201, 151, 0.4);
+}
+
+.search-button:disabled {
+    background: #6c757d;
+    background: -webkit-linear-gradient(135deg, #6c757d, #5a6268);
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    cursor: not-allowed;
+    -webkit-transform: none;
+    transform: none;
+    -webkit-box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+    opacity: 0.7;
+}
+
+.search-button i {
+    font-size: 1.2rem;
+    /* Fallback para Safari sin drop-shadow */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Estado de carga con spinner - Compatible con Safari */
+.search-button .fa-spinner {
+    -webkit-animation: safariSpin 1s linear infinite;
+    animation: safariSpin 1s linear infinite;
+}
+
+@-webkit-keyframes safariSpin {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes safariSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Estilo específico para Safari */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    .search-button {
+        /* Optimizaciones específicas para WebKit/Safari */
+        background-clip: padding-box;
+        -webkit-background-clip: padding-box;
+        border-radius: 25px; /* Más conservador en Safari */
+    }
+}
+
+/* Estilo específico para dispositivos Apple */
+@supports (-webkit-appearance: none) {
+    .search-button {
+        /* Mejoras para Safari en iOS y macOS */
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+        /* Forzar renderizado de hardware en Safari */
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+        /* Mejor antialiasing en Safari */
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    
+    .search-button:hover {
+        -webkit-transform: translate3d(0, -2px, 0);
+        transform: translate3d(0, -2px, 0);
+    }
+    
+    .search-button:active {
+        -webkit-transform: translate3d(0, 0, 0);
+        transform: translate3d(0, 0, 0);
+    }
+}
+
+/* Mejoras específicas para Safari en macOS */
+@media screen and (min-width: 768px) and (-webkit-min-device-pixel-ratio: 1) {
+    .search-button {
+        /* Mejor renderizado en Safari desktop */
+        font-weight: 600; /* Menos bold en Safari desktop */
+        letter-spacing: 0.3px; /* Spacing más sutil */
+    }
+}
+
+/* Mejoras para Safari en iOS */
+@media screen and (max-width: 767px) and (-webkit-min-device-pixel-ratio: 2) {
+    .search-button {
+        /* Optimizaciones para Safari móvil */
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+        font-size: 1rem; /* Ligeramente más pequeño en móvil */
+        padding: 1rem 2rem;
+    }
+}
+
+/* Resultado de búsqueda de turno */
+.appointment-result {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 15px;
+    border-left: 5px solid #17a2b8;
+    margin-top: 2rem;
+}
+
+.appointment-found {
+    border-left-color: #28a745;
+}
+
+.appointment-not-found {
+    border-left-color: #dc3545;
+}
+
+.appointment-details {
+    margin-bottom: 1.5rem;
+}
+
+.appointment-detail {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.appointment-detail:not(:last-child) {
+    border-bottom: 1px solid #e9ecef;
+}
+
+.appointment-label {
+    font-weight: 600;
+    color: #17a2b8;
+}
+
+.appointment-value {
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.cancel-button {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.cancel-button:hover {
+    background: linear-gradient(135deg, #c82333, #bd2130);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+/* Botón de cancelar mejorado */
+.cancel-button-enhanced {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    border: none;
+    padding: 1.2rem 2.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 60px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    margin: 1.5rem auto;
+    box-shadow: 
+        0 8px 25px rgba(231, 76, 60, 0.4),
+        0 4px 10px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+    min-width: 220px;
+    font-family: 'Poppins', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cancel-button-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.cancel-button-enhanced:hover::before {
+    left: 100%;
+}
+
+.cancel-button-enhanced:hover {
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 
+        0 12px 35px rgba(231, 76, 60, 0.5),
+        0 8px 15px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    border-color: #fff2;
+}
+
+.cancel-button-enhanced:active {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 
+        0 5px 15px rgba(231, 76, 60, 0.4),
+        0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.cancel-button-enhanced i {
+    font-size: 1.2rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Estilos del botón modificar removidos - ya no se usa */
+
+.appointment-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
     
     .about-content {
         grid-template-columns: 1fr;
         text-align: center;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    .cta-button.secondary {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .appointment-actions {
+        flex-direction: column;
+    }
+    
+    .cancel-button,
+    .cancel-button-enhanced,
+    .search-button {
+        margin: 0.5rem 0;
+        justify-content: center;
+        min-width: 200px;
+        padding: 1rem 2rem;
+        font-size: 1rem;
+        min-height: 50px;
     }
     
     .location-content {

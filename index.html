@@ -38,7 +38,8 @@
             </div>
             <p>Relajación y bienestar para tu cuerpo y mente</p>
             
-            <!-- Botón de confirmación de pago (solo se muestra si hay datos pendientes) -->
+            <!-- Botón de confirmación de pago (COMENTADO - por revisar si queremos mantenerlo) -->
+            <!--
             <div id="paymentConfirmation" class="payment-confirmation" style="display: none;">
                 <button id="confirmPaymentBtn" class="confirm-payment-button">
                     <i class="fas fa-check-circle"></i>
@@ -46,8 +47,12 @@
                 </button>
                 <p class="confirm-text">¿Completaste el pago en Mercado Pago? Haz click aquí para confirmar tu reserva.</p>
             </div>
+            -->
             
-            <a href="#reservar" class="cta-button">Reservar Sesión</a>
+            <div class="cta-buttons">
+                <a href="#reservar" class="cta-button">Reservar Sesión</a>
+                <button id="checkAppointmentBtn" class="cta-button secondary">¿Ya tengo turno?</button>
+            </div>
         </div>
         <div class="hero-image">
             <i class="fas fa-spa hero-icon"></i>
@@ -261,6 +266,10 @@
                 <!-- Enlace temporal para testing -->
                 <p style="margin-top: 1rem; font-size: 0.8rem; color: #999;">
                     <a href="#" onclick="testSuccessPage()" style="color: #666;">🔗 Testing: Página de Éxito con datos</a>
+                    <span style="margin: 0 1rem;">|</span>
+                    <a href="#" onclick="testPaymentFlow()" style="color: #666;">💳 Testing: Flujo completo de pago</a>
+                    <span style="margin: 0 1rem;">|</span>
+                    <a href="#" onclick="testAppointmentLookup()" style="color: #666;">📅 Testing: Consulta de turno</a>
                 </p>
             </div>
         </div>
@@ -285,6 +294,33 @@
                     Pagar con Mercado Pago
                 </button>
 
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Consulta de Turnos -->
+    <div id="appointmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeAppointmentModal">&times;</span>
+            <h3>Consultar mi Turno</h3>
+            <p class="modal-subtitle">Ingresa tu DNI para verificar si tienes un turno reservado</p>
+            
+            <div class="appointment-lookup">
+                <div class="form-group">
+                    <label for="lookupDni">DNI</label>
+                    <input type="text" id="lookupDni" name="lookupDni" placeholder="Ej: 12345678" maxlength="8" required>
+                    <small>Ingresa el mismo DNI con el que reservaste</small>
+                </div>
+                
+                <button id="searchAppointmentBtn" class="search-button">
+                    <i class="fas fa-calendar-check"></i>
+                    Buscar mi Turno
+                </button>
+            </div>
+            
+            <!-- Resultado de la búsqueda -->
+            <div id="appointmentResult" class="appointment-result" style="display: none;">
+                <!-- Se llena dinámicamente -->
             </div>
         </div>
     </div>

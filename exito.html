@@ -190,6 +190,11 @@
                     Enviar WhatsApp a Antonella
                 </button>
                 
+                <button id="copyMessageBtn" class="btn" style="background: #6c757d; margin-left: 10px;">
+                    <i class="fas fa-copy"></i>
+                    Copiar Mensaje
+                </button>
+                
                 <a href="index.html" class="btn btn-home">
                     <i class="fas fa-home"></i>
                     Volver al Inicio
@@ -241,8 +246,12 @@
 
         // Enviar mensaje de WhatsApp
         function sendWhatsApp(bookingData) {
+            console.log('📱 Iniciando envío de WhatsApp...');
+            console.log('📋 Datos recibidos:', bookingData);
+            
             // Validar que existan los datos necesarios
             if (!bookingData || !bookingData.name || !bookingData.date || !bookingData.time || !bookingData.service) {
+                console.error('❌ Datos de reserva incompletos:', bookingData);
                 alert('Error: No se encontraron los datos de la reserva. Por favor, realiza una nueva reserva desde el inicio.');
                 window.location.href = 'index.html';
                 return;
@@ -254,23 +263,140 @@
                 'deportivo': 'Masaje Deportivo'
             };
             
-            // Formatear fecha para WhatsApp
-            const formattedDate = new Date(bookingData.date).toLocaleDateString('es-ES');
+            // Formatear fecha para WhatsApp (con timezone fix)
+            const formattedDate = new Date(bookingData.date + 'T12:00:00').toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
             
-            // Crear mensaje
-            const message = `¡Hola Anto! Te acabo de reservar el ${formattedDate} a las ${bookingData.time}.\nServicio: ${serviceNames[bookingData.service]}\n${bookingData.name}\nDNI ${bookingData.dni}\n\n✅ Pago confirmado vía Mercado Pago`;
+            console.log('📅 Fecha formateada:', formattedDate);
+            
+            // Crear mensaje con formato optimizado para WhatsApp
+            const message = `¡Hola Anto! Te acabo de reservar el ${formattedDate} a las ${bookingData.time}.
+
+Servicio: ${serviceNames[bookingData.service]}
+Cliente: ${bookingData.name}
+DNI: ${bookingData.dni}
+
+✅ Pago confirmado vía Mercado Pago`;
+            
+            console.log('📱 Mensaje generado:', message);
+            console.log('📏 Longitud del mensaje:', message.length, 'caracteres');
             
             // Número de WhatsApp de Antonella
             const phoneNumber = envLoader.get('WHATSAPP_PHONE') || '5491140691400';
+            console.log('📞 Número de teléfono:', phoneNumber);
             
             // Crear URL de WhatsApp
             const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
             
-            console.log('Mensaje WhatsApp:', message);
-            console.log('URL WhatsApp:', whatsappUrl);
+            console.log('🔗 URL de WhatsApp generada:');
+            console.log(whatsappUrl);
+            
+            // Verificar si la URL es muy larga
+            if (whatsappUrl.length > 2000) {
+                console.warn('⚠️ URL muy larga, podría causar problemas');
+            }
+            
+            console.log('📱 Abriendo WhatsApp...');
             
             // Abrir WhatsApp
-            window.open(whatsappUrl, '_blank');
+            const newWindow = window.open(whatsappUrl, '_blank');
+            
+            if (!newWindow) {
+                console.error('❌ No se pudo abrir WhatsApp (bloqueado por popup)');
+                alert('No se pudo abrir WhatsApp automáticamente. Por favor, habilita los popups o copia el mensaje manualmente.');
+            } else {
+                console.log('✅ WhatsApp abierto exitosamente');
+            }
+        }
+
+        // Copiar mensaje de WhatsApp al portapapeles
+        function copyWhatsAppMessage(bookingData) {
+            console.log('📋 Copiando mensaje de WhatsApp...');
+            
+            // Validar que existan los datos necesarios
+            if (!bookingData || !bookingData.name || !bookingData.date || !bookingData.time || !bookingData.service) {
+                console.error('❌ Datos de reserva incompletos para copiar:', bookingData);
+                alert('Error: No se encontraron los datos de la reserva.');
+                return;
+            }
+            
+            const serviceNames = {
+                'descontracturante': 'Masaje Descontracturante',
+                'relajante': 'Masaje Relajante',
+                'deportivo': 'Masaje Deportivo'
+            };
+            
+            // Formatear fecha para WhatsApp (con timezone fix)
+            const formattedDate = new Date(bookingData.date + 'T12:00:00').toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Crear mensaje con formato optimizado para WhatsApp
+            const message = `¡Hola Anto! Te acabo de reservar el ${formattedDate} a las ${bookingData.time}.
+
+Servicio: ${serviceNames[bookingData.service]}
+Cliente: ${bookingData.name}
+DNI: ${bookingData.dni}
+
+✅ Pago confirmado vía Mercado Pago`;
+            
+            console.log('📱 Mensaje para copiar:', message);
+            
+            // Copiar al portapapeles
+            if (navigator.clipboard && window.isSecureContext) {
+                // Método moderno
+                navigator.clipboard.writeText(message).then(() => {
+                    console.log('✅ Mensaje copiado al portapapeles');
+                    alert('✅ Mensaje copiado al portapapeles!\n\nAhora puedes:\n1. Abrir WhatsApp manualmente\n2. Buscar a Antonella\n3. Pegar el mensaje (Ctrl+V)');
+                }).catch(err => {
+                    console.error('❌ Error copiando:', err);
+                    fallbackCopyTextToClipboard(message);
+                });
+            } else {
+                // Método de respaldo
+                fallbackCopyTextToClipboard(message);
+            }
+        }
+        
+        // Método de respaldo para copiar texto
+        function fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            
+            // Evitar scroll en iOS
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    console.log('✅ Mensaje copiado usando método de respaldo');
+                    alert('✅ Mensaje copiado al portapapeles!\n\nAhora puedes:\n1. Abrir WhatsApp manualmente\n2. Buscar a Antonella\n3. Pegar el mensaje (Ctrl+V)');
+                } else {
+                    console.error('❌ Error copiando con método de respaldo');
+                    showManualCopyDialog(text);
+                }
+            } catch (err) {
+                console.error('❌ Error en execCommand:', err);
+                showManualCopyDialog(text);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        // Mostrar diálogo para copia manual
+        function showManualCopyDialog(text) {
+            alert(`No se pudo copiar automáticamente. Por favor copia este mensaje manualmente:\n\n${text}`);
         }
 
         // Cargar datos de la reserva y mostrar resumen
@@ -385,6 +511,11 @@
                     sendWhatsApp(bookingData);
                 });
                 
+                // Configurar botón de copiar mensaje
+                document.getElementById('copyMessageBtn').addEventListener('click', function() {
+                    copyWhatsAppMessage(bookingData);
+                });
+                
                 // Configurar botón de debug
                 document.getElementById('debugBtn').addEventListener('click', function() {
                     console.log('Datos de reserva:', bookingData);
@@ -399,8 +530,9 @@
                     localStorage.removeItem('bookingData');
                 }, 30000);
             } else {
-                // Si no hay datos, ocultar botones de WhatsApp y debug
+                // Si no hay datos, ocultar botones de WhatsApp, copiar y debug
                 document.getElementById('sendWhatsAppBtn').style.display = 'none';
+                document.getElementById('copyMessageBtn').style.display = 'none';
                 document.getElementById('debugBtn').style.display = 'none';
                 document.querySelector('.countdown').style.display = 'none';
             }

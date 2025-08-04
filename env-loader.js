@@ -21,16 +21,16 @@ class EnvLoader {
     // Variables para producción (GitHub Pages)
     loadProductionEnv() {
         this.env = {
-            // 📅 Google Calendar - CONFIGURAR CON TUS CREDENCIALES REALES
-            GOOGLE_API_KEY: 'TU_API_KEY_AQUI',
-            GOOGLE_CLIENT_ID: 'TU_CLIENT_ID_AQUI.apps.googleusercontent.com',
-            GOOGLE_CALENDAR_ID: '0d0646b01e85b3ff948744102e2feaa09677224064e14864689a26f0eb27e246@group.calendar.google.com',
+            // 📅 Google Calendar - CONFIGURAR EN VARIABLES DE ENTORNO DE VERCEL
+            GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || 'TU_API_KEY_AQUI',
+            GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || 'TU_CLIENT_ID_AQUI.apps.googleusercontent.com',
+            GOOGLE_CALENDAR_ID: process.env.GOOGLE_CALENDAR_ID || 'TU_CALENDAR_ID_AQUI@group.calendar.google.com',
             
             // 💳 Mercado Pago
-            MERCADOPAGO_LINK: 'https://mpago.la/1zvBGJ7',
+            MERCADOPAGO_LINK: process.env.MERCADOPAGO_LINK || 'https://mpago.la/TU_LINK_AQUI',
             
             // 📱 WhatsApp
-            WHATSAPP_PHONE: '5491140691400'
+            WHATSAPP_PHONE: process.env.WHATSAPP_PHONE || '5491140691400'
         };
         console.log('🌍 Variables de producción cargadas');
         return true;
@@ -80,16 +80,16 @@ class EnvLoader {
     // Variables por defecto (fallback)
     loadDefaultEnv() {
         this.env = {
-            // 📅 Google Calendar - CONFIGURAR CON TUS CREDENCIALES REALES
+            // 📅 Google Calendar - CONFIGURAR EN .ENV O VARIABLES DE ENTORNO
             GOOGLE_API_KEY: 'TU_API_KEY_AQUI',
             GOOGLE_CLIENT_ID: 'TU_CLIENT_ID_AQUI.apps.googleusercontent.com',
-            GOOGLE_CALENDAR_ID: 'CLAVE_AQUI@group.calendar.google.com',
+            GOOGLE_CALENDAR_ID: 'TU_CALENDAR_ID_AQUI@group.calendar.google.com',
             
             // 💳 Mercado Pago
-            MERCADOPAGO_LINK: 'https://mpago.la/1zvBGJ7',
+            MERCADOPAGO_LINK: 'https://mpago.la/TU_LINK_AQUI',
             
             // 📱 WhatsApp
-            WHATSAPP_PHONE: '5491140691400'
+            WHATSAPP_PHONE: 'TU_TELEFONO_AQUI'
         };
         console.log('🔧 Variables por defecto cargadas');
         return false;
