@@ -269,42 +269,19 @@ async function processMercadoPago() {
             return;
         }
 
-        // Crear evento en Google Calendar ANTES de ir a Mercado Pago
-        console.log('🔄 Creando evento en calendario antes del pago...');
-        console.log('📋 Datos de la reserva:', bookingData);
+        // Guardar datos de la reserva para crear evento DESPUÉS del pago
+        saveBookingData();
         
-        const calendarResult = await createRealCalendarEvent(bookingData);
+        // Marcar tiempo de inicio del pago
+        localStorage.setItem('paymentStartTime', Date.now().toString());
         
-        if (calendarResult.success) {
-            console.log('✅ Evento procesado:', calendarResult.eventId, `(${calendarResult.mode})`);
-            
-            // Guardar datos de la reserva
-            saveBookingData();
-            
-            // Marcar tiempo de inicio del pago
-            localStorage.setItem('paymentStartTime', Date.now().toString());
-            
-            // Crear URL de Mercado Pago con redirección automática
-            const mercadoPagoUrl = createMercadoPagoUrl(bookingData);
-            
-            // Mostrar mensaje según el modo
-            if (calendarResult.mode === 'simulation') {
-                console.log('📱 Evento simulado - continuando con pago');
-            }
-            
-            console.log('🔗 Redirigiendo a Mercado Pago con URL:', mercadoPagoUrl);
-            
-            // Redirigir a Mercado Pago
-            window.location.href = mercadoPagoUrl;
-            
-        } else {
-            console.error('❌ Error creando evento:', calendarResult.error);
-            alert('No se pudo procesar la reserva. Por favor intenta nuevamente o contacta a Antonella directamente.');
-            
-            // Restaurar botón
-            mercadoPagoBtn.textContent = originalText;
-            mercadoPagoBtn.disabled = false;
-        }
+        // Crear URL de Mercado Pago con redirección automática
+        const mercadoPagoUrl = createMercadoPagoUrl(bookingData);
+        
+        console.log('🔗 Redirigiendo a Mercado Pago con URL:', mercadoPagoUrl);
+        
+        // Redirigir a Mercado Pago
+        window.location.href = mercadoPagoUrl;
         
     } catch (error) {
         console.error('❌ Error en processMercadoPago:', error);
