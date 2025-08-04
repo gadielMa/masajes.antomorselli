@@ -190,20 +190,10 @@
                     Enviar WhatsApp a Antonella
                 </button>
                 
-                <button id="copyMessageBtn" class="btn" style="background: #6c757d; margin-left: 10px;">
-                    <i class="fas fa-copy"></i>
-                    Copiar Mensaje
-                </button>
-                
                 <a href="index.html" class="btn btn-home">
                     <i class="fas fa-home"></i>
                     Volver al Inicio
                 </a>
-                
-                <button id="debugBtn" class="btn" style="background: #666; color: white; font-size: 0.8rem;">
-                    <i class="fas fa-bug"></i>
-                    Debug: Ver datos
-                </button>
             </div>
             
             <div class="countdown">
@@ -312,92 +302,7 @@ DNI: ${bookingData.dni}
             }
         }
 
-        // Copiar mensaje de WhatsApp al portapapeles
-        function copyWhatsAppMessage(bookingData) {
-            console.log('📋 Copiando mensaje de WhatsApp...');
-            
-            // Validar que existan los datos necesarios
-            if (!bookingData || !bookingData.name || !bookingData.date || !bookingData.time || !bookingData.service) {
-                console.error('❌ Datos de reserva incompletos para copiar:', bookingData);
-                alert('Error: No se encontraron los datos de la reserva.');
-                return;
-            }
-            
-            const serviceNames = {
-                'descontracturante': 'Masaje Descontracturante',
-                'relajante': 'Masaje Relajante',
-                'deportivo': 'Masaje Deportivo'
-            };
-            
-            // Formatear fecha para WhatsApp (con timezone fix)
-            const formattedDate = new Date(bookingData.date + 'T12:00:00').toLocaleDateString('es-ES', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            
-            // Crear mensaje con formato optimizado para WhatsApp
-            const message = `¡Hola Anto! Te acabo de reservar el ${formattedDate} a las ${bookingData.time}.
 
-Servicio: ${serviceNames[bookingData.service]}
-Cliente: ${bookingData.name}
-DNI: ${bookingData.dni}
-
-✅ Pago confirmado vía Mercado Pago`;
-            
-            console.log('📱 Mensaje para copiar:', message);
-            
-            // Copiar al portapapeles
-            if (navigator.clipboard && window.isSecureContext) {
-                // Método moderno
-                navigator.clipboard.writeText(message).then(() => {
-                    console.log('✅ Mensaje copiado al portapapeles');
-                    alert('✅ Mensaje copiado al portapapeles!\n\nAhora puedes:\n1. Abrir WhatsApp manualmente\n2. Buscar a Antonella\n3. Pegar el mensaje (Ctrl+V)');
-                }).catch(err => {
-                    console.error('❌ Error copiando:', err);
-                    fallbackCopyTextToClipboard(message);
-                });
-            } else {
-                // Método de respaldo
-                fallbackCopyTextToClipboard(message);
-            }
-        }
-        
-        // Método de respaldo para copiar texto
-        function fallbackCopyTextToClipboard(text) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            
-            // Evitar scroll en iOS
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            textArea.style.position = "fixed";
-            
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    console.log('✅ Mensaje copiado usando método de respaldo');
-                    alert('✅ Mensaje copiado al portapapeles!\n\nAhora puedes:\n1. Abrir WhatsApp manualmente\n2. Buscar a Antonella\n3. Pegar el mensaje (Ctrl+V)');
-                } else {
-                    console.error('❌ Error copiando con método de respaldo');
-                    showManualCopyDialog(text);
-                }
-            } catch (err) {
-                console.error('❌ Error en execCommand:', err);
-                showManualCopyDialog(text);
-            }
-            
-            document.body.removeChild(textArea);
-        }
-        
-        // Mostrar diálogo para copia manual
-        function showManualCopyDialog(text) {
-            alert(`No se pudo copiar automáticamente. Por favor copia este mensaje manualmente:\n\n${text}`);
-        }
 
         // Cargar datos de la reserva y mostrar resumen
         function loadBookingData() {
@@ -511,16 +416,6 @@ DNI: ${bookingData.dni}
                     sendWhatsApp(bookingData);
                 });
                 
-                // Configurar botón de copiar mensaje
-                document.getElementById('copyMessageBtn').addEventListener('click', function() {
-                    copyWhatsAppMessage(bookingData);
-                });
-                
-                // Configurar botón de debug
-                document.getElementById('debugBtn').addEventListener('click', function() {
-                    console.log('Datos de reserva:', bookingData);
-                    alert(`Datos de reserva:\n\nNombre: ${bookingData.name}\nDNI: ${bookingData.dni}\nServicio: ${bookingData.service}\nFecha: ${bookingData.date}\nHora: ${bookingData.time}`);
-                });
                 
                 // Iniciar countdown automático
                 startCountdown(bookingData);
@@ -530,10 +425,8 @@ DNI: ${bookingData.dni}
                     localStorage.removeItem('bookingData');
                 }, 30000);
             } else {
-                // Si no hay datos, ocultar botones de WhatsApp, copiar y debug
+                // Si no hay datos, ocultar botones de WhatsApp
                 document.getElementById('sendWhatsAppBtn').style.display = 'none';
-                document.getElementById('copyMessageBtn').style.display = 'none';
-                document.getElementById('debugBtn').style.display = 'none';
                 document.querySelector('.countdown').style.display = 'none';
             }
         });
