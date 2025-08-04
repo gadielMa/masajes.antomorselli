@@ -18,19 +18,19 @@ class EnvLoader {
         }
     }
 
-    // Variables para producción (GitHub Pages)
+    // Variables para producción (Vercel)
     loadProductionEnv() {
         this.env = {
-            // 📅 Google Calendar - CONFIGURAR EN VARIABLES DE ENTORNO DE VERCEL
-            GOOGLE_API_KEY: process.env.GOOGLE_API_KEY || 'TU_API_KEY_AQUI',
-            GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || 'TU_CLIENT_ID_AQUI.apps.googleusercontent.com',
-            GOOGLE_CALENDAR_ID: process.env.GOOGLE_CALENDAR_ID || 'TU_CALENDAR_ID_AQUI@group.calendar.google.com',
+            // 📅 Google Calendar - VALORES REALES PARA VERCEL
+            GOOGLE_API_KEY: 'AIzaSyAcqD9F9ghAAtQ3dgmHheWIYzVEdhqo3Cc',
+            GOOGLE_CLIENT_ID: '1070397058047-24s5qj4hmkl6ia3dvf4hpoqbifaa9aan.apps.googleusercontent.com',
+            GOOGLE_CALENDAR_ID: 'gadiel.malagrino@gmail.com',
             
             // 💳 Mercado Pago
-            MERCADOPAGO_LINK: process.env.MERCADOPAGO_LINK || 'https://mpago.la/TU_LINK_AQUI',
+            MERCADOPAGO_LINK: 'https://mpago.la/1zx2bg3',
             
             // 📱 WhatsApp
-            WHATSAPP_PHONE: process.env.WHATSAPP_PHONE || '5491140691400'
+            WHATSAPP_PHONE: '5491140691400'
         };
         console.log('🌍 Variables de producción cargadas');
         return true;
