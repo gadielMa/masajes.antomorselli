@@ -1,0 +1,19 @@
+project_id = "jbrjsvkdnyzptkxnflbe"
+
+[functions.availability]
+verify_jwt = false
+
+[functions.create-booking]
+verify_jwt = false
+
+[functions.create-preference]
+verify_jwt = false
+
+[functions.appointment]
+verify_jwt = false
+
+[functions.cancel-booking]
+verify_jwt = false
+
+[functions.mercadopago-webhook]
+verify_jwt = false

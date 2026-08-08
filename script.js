@@ -186,14 +186,15 @@ function showPaymentModal() {
 // Las credenciales ahora se cargan desde variables de entorno
 
 // Guardar datos de la reserva en localStorage
-function saveBookingData() {
+function saveBookingData(extraData = {}) {
     const bookingData = {
         name: document.getElementById('name').value,
         dni: document.getElementById('dni').value,
         service: document.getElementById('service').value,
         date: getSelectedDate(),
         time: document.getElementById('time').value,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        ...extraData
     };
     
     localStorage.setItem('bookingData', JSON.stringify(bookingData));
@@ -269,19 +270,25 @@ async function processMercadoPago() {
             return;
         }
 
-        // Guardar datos de la reserva para crear evento DESPUÉS del pago
-        saveBookingData();
-        
-        // Marcar tiempo de inicio del pago
+        if (typeof isSupabaseConfigured !== 'function' || !isSupabaseConfigured()) {
+            throw new Error('El backend de reservas todavía no está configurado');
+        }
+
+        const preferenceResult = await callSupabaseFunction('create-preference', {
+            method: 'POST',
+            body: JSON.stringify(bookingData)
+        });
+
+        if (!preferenceResult.init_point) {
+            throw new Error('Mercado Pago no devolvió una URL de pago');
+        }
+
+        saveBookingData({ booking_id: preferenceResult.booking?.id });
         localStorage.setItem('paymentStartTime', Date.now().toString());
-        
-        // Crear URL de Mercado Pago con redirección automática
-        const mercadoPagoUrl = createMercadoPagoUrl(bookingData);
-        
-        console.log('🔗 Redirigiendo a Mercado Pago con URL:', mercadoPagoUrl);
-        
-        // Redirigir a Mercado Pago
-        window.location.href = mercadoPagoUrl;
+        localStorage.setItem('pendingPaymentId', preferenceResult.preference_id || 'pending');
+
+        console.log('🔗 Redirigiendo a Mercado Pago con preferencia:', preferenceResult.preference_id);
+        window.location.href = preferenceResult.init_point;
         
     } catch (error) {
         console.error('❌ Error en processMercadoPago:', error);
@@ -915,8 +922,55 @@ function setupRealTimeValidation() {
     });
 }
 
-// Función para crear evento real usando el servidor backend
+async function callSupabaseFunction(functionName, options = {}) {
+    if (typeof isSupabaseConfigured !== 'function' || !isSupabaseConfigured()) {
+        throw new Error('Supabase todavía no está configurado');
+    }
+
+    const response = await fetch(supabaseFunctionUrl(functionName), {
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_CONFIG.ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_CONFIG.ANON_KEY}`,
+            ...(options.headers || {})
+        }
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || `Supabase respondió HTTP ${response.status}`);
+    return result;
+}
+
+// Función para crear una reserva en Supabase.
 async function createRealCalendarEvent(bookingData) {
+    if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
+        if (bookingData.booking_id) {
+            return {
+                success: true,
+                eventId: bookingData.booking_id,
+                mode: 'supabase-payment-pending'
+            };
+        }
+
+        const result = await callSupabaseFunction('create-booking', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: bookingData.name,
+                dni: bookingData.dni,
+                service: bookingData.service,
+                date: bookingData.date,
+                time: bookingData.time,
+                payment_id: bookingData.payment_id || null
+            })
+        });
+        return {
+            success: Boolean(result.booking),
+            eventId: result.booking?.id,
+            mode: 'supabase',
+            booking: result.booking
+        };
+    }
+
     console.log('📅 Enviando evento al servidor backend...');
     
     try {
@@ -963,6 +1017,11 @@ async function createRealCalendarEvent(bookingData) {
 // Función para obtener horarios disponibles del servidor backend
 async function getRealAvailableSlots(date) {
     console.log('📅 Obteniendo horarios disponibles para:', date);
+
+    if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
+        const result = await callSupabaseFunction(`availability?date=${encodeURIComponent(date)}`);
+        return result.available || [];
+    }
     
     try {
         // Primero obtener eventos existentes del servidor
@@ -1209,6 +1268,16 @@ async function searchAppointmentByDni() {
 
 // Buscar turno en el servidor backend
 async function searchAppointmentInBackend(dni) {
+    if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
+        try {
+            const result = await callSupabaseFunction(`appointment?dni=${encodeURIComponent(dni)}`);
+            return result.appointment || null;
+        } catch (error) {
+            console.error('❌ Error buscando turno en Supabase:', error);
+            return null;
+        }
+    }
+
     try {
         const response = await fetch(`http://localhost:3001/search-appointment?dni=${dni}`);
         
@@ -1477,6 +1546,19 @@ async function cancelAppointment(appointmentId, dni) {
 
 // Cancelar turno en servidor backend
 async function cancelAppointmentInBackend(appointmentId, dni) {
+    if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
+        try {
+            const result = await callSupabaseFunction('cancel-booking', {
+                method: 'POST',
+                body: JSON.stringify({ id: appointmentId, dni })
+            });
+            return Boolean(result.booking);
+        } catch (error) {
+            console.error('❌ Error cancelando turno en Supabase:', error);
+            return false;
+        }
+    }
+
     try {
         const response = await fetch('http://localhost:3001/cancel-appointment', {
             method: 'POST',

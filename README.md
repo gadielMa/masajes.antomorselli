@@ -2,7 +2,31 @@
 
 Sitio web profesional para reservas de masajes terapéuticos.
 
-## 🚀 Deploy en Vercel
+## 🚀 Arquitectura actual
+
+El frontend es estático y se puede publicar en GitHub Pages, Vercel o cualquier hosting estático.
+El backend se prepara con Supabase Edge Functions y Supabase Database.
+
+## 🔐 Configurar Supabase
+
+1. Crear un proyecto en [Supabase](https://supabase.com/).
+2. Ejecutar `supabase/migrations/20260808000000_create_bookings.sql` desde el SQL Editor.
+3. Copiar la URL del proyecto y la `anon key` en `supabase-config.js`.
+4. Configurar estas variables como secretos de las Edge Functions:
+
+```bash
+SUPABASE_URL=https://tu-proyecto.supabase.co
+SERVICE_ROLE_KEY=tu_service_role_key
+MERCADOPAGO_ACCESS_TOKEN=tu_access_token
+GOOGLE_SERVICE_ACCOUNT_JSON=pendiente_de_configurar
+GOOGLE_CALENDAR_ID=tu_calendario
+```
+
+5. Desplegar las funciones de `supabase/functions/` con Supabase CLI.
+
+La `service_role key`, el access token de Mercado Pago y las credenciales de Google nunca deben ir en el frontend.
+
+## 🚀 Deploy del frontend
 
 ### 1. Configurar Variables de Entorno
 

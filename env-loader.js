@@ -21,10 +21,10 @@ class EnvLoader {
     // Variables para producción (Vercel)
     loadProductionEnv() {
         this.env = {
-            // 📅 Google Calendar - VALORES REALES PARA VERCEL
-            GOOGLE_API_KEY: 'AIzaSyAcqD9F9ghAAtQ3dgmHheWIYzVEdhqo3Cc',
-            GOOGLE_CLIENT_ID: '1070397058047-24s5qj4hmkl6ia3dvf4hpoqbifaa9aan.apps.googleusercontent.com',
-            GOOGLE_CALENDAR_ID: 'gadiel.malagrino@gmail.com',
+            // Google Calendar se configurará exclusivamente en Supabase.
+            GOOGLE_API_KEY: '',
+            GOOGLE_CLIENT_ID: '',
+            GOOGLE_CALENDAR_ID: '',
             
             // 💳 Mercado Pago
             MERCADOPAGO_LINK: 'https://mpago.la/1zx2bg3',
