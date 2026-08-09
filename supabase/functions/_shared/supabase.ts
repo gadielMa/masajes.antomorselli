@@ -53,6 +53,18 @@ type BusinessHours = {
   active: boolean;
 };
 
+type AvailabilityRule = {
+  start_date: string;
+  start_time: string;
+  end_time: string;
+  frequency: "once" | "weekly" | "monthly";
+  interval_count: number;
+  occurrences: number | null;
+  until_date: string | null;
+  weekdays: number[];
+  active: boolean;
+};
+
 function weekdayForDate(date: string) {
   return new Date(`${date}T12:00:00-03:00`).getUTCDay();
 }
@@ -60,6 +72,51 @@ function weekdayForDate(date: string) {
 function timeToMinutes(value: string) {
   const [hours, minutes] = value.slice(0, 5).split(":").map(Number);
   return hours * 60 + minutes;
+}
+
+function dateToDayNumber(date: string) {
+  return Math.floor(Date.parse(`${date}T12:00:00-03:00`) / 86400000);
+}
+
+function ruleAppliesOnDate(rule: AvailabilityRule, date: string) {
+  if (!rule.active || date < rule.start_date || (rule.until_date && date > rule.until_date)) return false;
+  const dateValue = new Date(`${date}T12:00:00-03:00`);
+  const startValue = new Date(`${rule.start_date}T12:00:00-03:00`);
+  const daysSinceStart = dateToDayNumber(date) - dateToDayNumber(rule.start_date);
+
+  if (rule.frequency === "once") return date === rule.start_date;
+  if (rule.frequency === "weekly") {
+    if (!rule.weekdays.includes(dateValue.getUTCDay())) return false;
+    const weekNumber = Math.floor(daysSinceStart / 7);
+    if (weekNumber % rule.interval_count !== 0) return false;
+    if (rule.occurrences) {
+      let count = 0;
+      for (let offset = 0; offset <= daysSinceStart; offset++) {
+        const current = new Date(startValue);
+        current.setUTCDate(current.getUTCDate() + offset);
+        if (rule.weekdays.includes(current.getUTCDay()) && Math.floor(offset / 7) % rule.interval_count === 0) count++;
+      }
+      if (count > rule.occurrences) return false;
+    }
+    return true;
+  }
+
+  const monthsSinceStart = (dateValue.getUTCFullYear() - startValue.getUTCFullYear()) * 12
+    + dateValue.getUTCMonth() - startValue.getUTCMonth();
+  if (monthsSinceStart < 0 || monthsSinceStart % rule.interval_count !== 0) return false;
+  if (rule.occurrences && (monthsSinceStart / rule.interval_count) + 1 > rule.occurrences) return false;
+  return dateValue.getUTCDate() === startValue.getUTCDate()
+    && dateValue.getUTCDate() <= new Date(Date.UTC(dateValue.getUTCFullYear(), dateValue.getUTCMonth() + 1, 0)).getUTCDate();
+}
+
+function slotsFromRange(startTime: string, endTime: string, slotMinutes = 60) {
+  const slots: string[] = [];
+  const start = timeToMinutes(startTime);
+  const end = timeToMinutes(endTime);
+  for (let minute = start; minute + slotMinutes <= end; minute += slotMinutes) {
+    slots.push(`${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`);
+  }
+  return slots;
 }
 
 async function hoursForDate(
@@ -84,17 +141,21 @@ export async function slotsForDate(
   date: string,
   businessId?: string,
 ) {
+  const { data: rules, error: rulesError } = await supabase
+    .from("availability_rules")
+    .select("start_date, start_time, end_time, frequency, interval_count, occurrences, until_date, weekdays, active")
+    .eq("business_id", businessId)
+    .eq("active", true);
+  if (!rulesError && rules?.length) {
+    return [...new Set((rules as AvailabilityRule[])
+      .filter((rule) => ruleAppliesOnDate(rule, date))
+      .flatMap((rule) => slotsFromRange(rule.start_time, rule.end_time)))];
+  }
+
   const hours = await hoursForDate(supabase, date, businessId);
   if (!hours || !hours.active) return [];
 
-  const start = timeToMinutes(hours.start_time);
-  const end = timeToMinutes(hours.end_time);
-  const slots: string[] = [];
-
-  for (let minute = start; minute + hours.slot_minutes <= end; minute += hours.slot_minutes) {
-    slots.push(`${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`);
-  }
-  return slots;
+  return slotsFromRange(hours.start_time, hours.end_time, hours.slot_minutes);
 }
 
 export async function isValidSlot(
