@@ -198,7 +198,16 @@ async function refreshSession() {
     if (error) throw error;
     showView(true);
     if (profile.role === 'platform_owner' && !businessSlug) dashboard.style.display = 'block';
-    else await loadBusinessDashboard(data.session.user, profile.role === 'platform_owner');
+    else if (!businessSlug) {
+      const { data: memberships, error: membershipError } = await supabaseClient
+        .from('business_members')
+        .select('business_id, businesses(slug)')
+        .eq('user_id', data.session.user.id)
+        .limit(1);
+      if (membershipError || !memberships?.length || !memberships[0].businesses?.slug) throw new Error('Tu usuario todavía no tiene un negocio asignado');
+      window.location.replace(`${window.location.pathname}?business=${encodeURIComponent(memberships[0].businesses.slug)}`);
+      return;
+    } else await loadBusinessDashboard(data.session.user, profile.role === 'platform_owner');
   } catch (error) { await supabaseClient.auth.signOut(); showMessage(document.getElementById('loginMessage'), error.message, 'error'); showView(false); }
 }
 
