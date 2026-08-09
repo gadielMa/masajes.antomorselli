@@ -88,6 +88,7 @@ Deno.serve(async (req) => {
     await supabase.from("bookings")
       .update({ payment_id: preference.id })
       .eq("id", booking.id);
+    await supabase.from("clients").upsert({ business_id: business.id, name: String(name).trim(), dni: String(dni) }, { onConflict: "business_id,dni" });
 
     return json({
       booking,

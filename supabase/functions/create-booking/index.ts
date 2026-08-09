@@ -35,6 +35,7 @@ Deno.serve(async (req) => {
       if (error.code === "23505") return json({ error: "Ese horario acaba de ser reservado" }, 409);
       throw error;
     }
+    await supabase.from("clients").upsert({ business_id: business.id, name: String(name).trim(), dni: String(dni) }, { onConflict: "business_id,dni" });
     return json({ booking: data }, 201);
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "Error interno" }, 500);

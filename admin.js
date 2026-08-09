@@ -21,7 +21,7 @@ const ARGENTINA_HOLIDAYS_2026 = {
 function argentinaHoliday(date) { return ARGENTINA_HOLIDAYS_2026[dateOnly(date)] || null; }
 
 function showMessage(element, message, type) { element.textContent = message; element.className = `admin-message ${type}`; }
-function showView(authenticated) { loginView.style.display = authenticated ? 'none' : 'block'; dashboard.style.display = 'none'; businessDashboard.style.display = 'none'; }
+function showView(authenticated) { loginView.style.display = authenticated ? 'none' : 'block'; dashboard.style.display = 'none'; businessDashboard.style.display = 'none'; document.getElementById('clientsPanel').classList.remove('active'); }
 function dateOnly(date) { return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
 function parseDate(value) { return new Date(`${value}T12:00:00`); }
 function addDays(date, days) { const next = new Date(date); next.setDate(next.getDate() + days); return next; }
@@ -83,6 +83,19 @@ async function loadAppointmentsCalendar() {
   appointmentsCalendar.render();
 }
 
+async function loadClients() {
+  const { data, error } = await supabaseClient.from('clients').select('name, dni').eq('business_id', currentBusiness.id).order('name');
+  if (error) throw error;
+  const list = document.getElementById('clientsList');
+  list.replaceChildren();
+  (data || []).forEach((client) => {
+    const row = document.createElement('tr');
+    const name = document.createElement('td'); name.textContent = client.name;
+    const dni = document.createElement('td'); dni.textContent = client.dni;
+    row.append(name, dni); list.appendChild(row);
+  });
+}
+
 function openScheduleModal({ ruleIndex = null, date, start = '14:00', end = '15:00' }) {
   editingRuleIndex = ruleIndex;
   const rule = ruleIndex === null ? null : scheduleRules[ruleIndex];
@@ -140,6 +153,7 @@ async function loadBusinessDashboard(user, isPlatformOwner = false) {
   });
   scheduleCalendar.render();
   await loadAppointmentsCalendar();
+  await loadClients();
   businessDashboard.style.display = 'block';
   return true;
 }
@@ -165,13 +179,30 @@ for (const id of ['logoutBtn', 'businessLogoutBtn']) document.getElementById(id)
 
 document.getElementById('appointmentsTab').addEventListener('click', () => {
   document.getElementById('appointmentsTab').classList.add('active'); document.getElementById('scheduleTab').classList.remove('active');
-  document.getElementById('appointmentsPanel').classList.add('active'); document.getElementById('schedulePanel').classList.remove('active');
+  document.getElementById('clientsTab').classList.remove('active'); document.getElementById('appointmentsPanel').classList.add('active'); document.getElementById('schedulePanel').classList.remove('active'); document.getElementById('clientsPanel').classList.remove('active');
   appointmentsCalendar?.updateSize();
 });
 document.getElementById('scheduleTab').addEventListener('click', () => {
-  document.getElementById('scheduleTab').classList.add('active'); document.getElementById('appointmentsTab').classList.remove('active');
-  document.getElementById('schedulePanel').classList.add('active'); document.getElementById('appointmentsPanel').classList.remove('active');
+  document.getElementById('scheduleTab').classList.add('active'); document.getElementById('appointmentsTab').classList.remove('active'); document.getElementById('clientsTab').classList.remove('active');
+  document.getElementById('schedulePanel').classList.add('active'); document.getElementById('appointmentsPanel').classList.remove('active'); document.getElementById('clientsPanel').classList.remove('active');
   scheduleCalendar?.updateSize();
+});
+document.getElementById('clientsTab').addEventListener('click', () => {
+  document.getElementById('clientsTab').classList.add('active'); document.getElementById('appointmentsTab').classList.remove('active'); document.getElementById('scheduleTab').classList.remove('active');
+  document.getElementById('clientsPanel').classList.add('active'); document.getElementById('appointmentsPanel').classList.remove('active'); document.getElementById('schedulePanel').classList.remove('active');
+});
+
+document.getElementById('clientForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const name = document.getElementById('clientName').value.trim();
+  const dni = document.getElementById('clientDni').value.trim();
+  const message = document.getElementById('clientsMessage');
+  if (!/^\d{7,8}$/.test(dni)) return showMessage(message, 'El DNI debe tener 7 u 8 dígitos.', 'error');
+  const { error } = await supabaseClient.from('clients').upsert({ business_id: currentBusiness.id, name, dni }, { onConflict: 'business_id,dni' });
+  if (error) return showMessage(message, error.message, 'error');
+  showMessage(message, 'Cliente guardado correctamente.', 'success');
+  event.target.reset();
+  await loadClients();
 });
 
 function toggleEarlyHours(kind, calendar, button) {
@@ -191,10 +222,12 @@ document.getElementById('cashCancel').addEventListener('click', () => document.g
 document.getElementById('cashForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   const date = document.getElementById('cashDate').value;
+  const cashDni = document.getElementById('cashDni').value.trim();
+  if (!/^\d{7,8}$/.test(cashDni)) return alert('El DNI debe tener 7 u 8 dígitos.');
   const { error } = await supabaseClient.from('bookings').insert({
     business_id: currentBusiness.id,
     name: document.getElementById('cashName').value.trim(),
-    dni: '0000000',
+    dni: cashDni,
     service: document.getElementById('cashService').value,
     booking_date: date,
     booking_time: `${document.getElementById('cashTime').value}:00`,
@@ -202,6 +235,7 @@ document.getElementById('cashForm').addEventListener('submit', async (event) => 
     payment_method: document.getElementById('cashPaymentMethod').value,
   });
   if (error) return alert(error.code === '23505' ? 'Ese horario ya está ocupado.' : error.message);
+  await supabaseClient.from('clients').upsert({ business_id: currentBusiness.id, name: document.getElementById('cashName').value.trim(), dni: cashDni }, { onConflict: 'business_id,dni' });
   document.getElementById('cashModal').classList.remove('open');
   document.getElementById('cashForm').reset();
   await loadAppointmentsCalendar();

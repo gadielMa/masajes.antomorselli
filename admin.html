@@ -44,6 +44,12 @@
     .legend-paid { background: #2e9d58; }
     .legend-cash { background: #d84a4a; }
     .legend-pending { background: #d49b2a; }
+    .clients-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .clients-table th, .clients-table td { padding: .75rem; text-align: left; border-bottom: 1px solid #eee; }
+    .clients-table th { color: #684054; }
+    .client-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: .7rem; align-items: end; margin-top: 1rem; }
+    .client-form button { border: 0; border-radius: 8px; padding: .85rem 1rem; background: #8B4B6B; color: white; cursor: pointer; font: inherit; font-weight: 600; }
+    @media (max-width: 700px) { .client-form { grid-template-columns: 1fr; } .clients-table { font-size: .9rem; } }
     .early-hours-toggle { border: 1px solid #8B4B6B; background: #fff; color: #8B4B6B; border-radius: 8px; padding: .55rem .8rem; cursor: pointer; font: inherit; font-weight: 600; margin: .7rem 0; }
     .schedule-modal { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; padding: 1rem; background: rgba(35,25,31,.45); }
     .schedule-modal.open { display: flex; }
@@ -89,6 +95,7 @@
       <nav class="panel-tabs" aria-label="Secciones del negocio">
         <button id="appointmentsTab" class="panel-tab active" type="button">Turnos</button>
         <button id="scheduleTab" class="panel-tab" type="button">Editar horarios disponibles</button>
+        <button id="clientsTab" class="panel-tab" type="button">Clientes</button>
       </nav>
       <section id="appointmentsPanel" class="panel-section active">
         <button id="cashBookingButton" class="schedule-save" type="button" style="border:0;border-radius:8px;padding:.75rem 1rem;cursor:pointer;font:inherit;font-weight:600;color:#fff;background:#d84a4a;">+ Agregar turno en efectivo</button>
@@ -103,6 +110,17 @@
         <div id="hoursCalendar"></div>
         <form id="hoursForm" class="admin-form"><button type="submit">Guardar horarios</button></form>
         <div id="hoursMessage" class="admin-message"></div>
+      </section>
+      <section id="clientsPanel" class="panel-section">
+        <h2>Clientes</h2>
+        <p>Personas que reservaron o fueron cargadas manualmente en este negocio.</p>
+        <form id="clientForm" class="client-form">
+          <label>Nombre<input id="clientName" required></label>
+          <label>DNI<input id="clientDni" inputmode="numeric" pattern="[0-9]{7,8}" minlength="7" maxlength="8" required></label>
+          <button type="submit">Agregar cliente</button>
+        </form>
+        <div id="clientsMessage" class="admin-message"></div>
+        <table class="clients-table"><thead><tr><th>Nombre</th><th>DNI</th></tr></thead><tbody id="clientsList"></tbody></table>
       </section>
     </section>
   </main>
@@ -132,6 +150,7 @@
       <h2>Agregar turno en efectivo</h2>
       <div class="admin-form">
         <label>Nombre del cliente<input id="cashName" required></label>
+        <label>DNI<input id="cashDni" inputmode="numeric" pattern="[0-9]{7,8}" minlength="7" maxlength="8" required></label>
         <label>Estado del pago<select id="cashPaymentMethod" required><option value="cash">Pago en efectivo</option><option value="pending">Pendiente</option></select></label>
         <label>Servicio<select id="cashService" required><option value="descontracturante">Masaje Descontracturante</option><option value="relajante">Masaje Relajante</option><option value="deportivo">Masaje Deportivo</option></select></label>
         <div class="schedule-grid"><label>Fecha<input id="cashDate" type="date" required></label><label>Horario<input id="cashTime" type="time" step="900" required></label></div>
