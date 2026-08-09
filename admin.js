@@ -304,11 +304,16 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
 for (const id of ['logoutBtn', 'businessLogoutBtn']) document.getElementById(id).addEventListener('click', async () => { await supabaseClient.auth.signOut(); platformOwnerBusinessAccess = false; sessionStorage.removeItem('platformBusinessAccess'); showView(false); });
 
 function showPlatformPanel(panelId, tabId) {
+  const list = document.getElementById('businessListItems');
   document.querySelectorAll('.platform-panel').forEach((panel) => panel.classList.toggle('active', panel.id === panelId));
   document.querySelectorAll('#dashboard .panel-tab').forEach((tab) => tab.classList.toggle('active', tab.id === tabId));
   if (panelId === 'reviewBusinessesPanel') {
+    list.replaceChildren();
+    const loading = document.createElement('p');
+    loading.className = 'business-empty';
+    loading.textContent = 'Cargando negocios...';
+    list.appendChild(loading);
     loadPlatformBusinesses().catch((error) => {
-      const list = document.getElementById('businessListItems');
       list.replaceChildren();
       const failure = document.createElement('p');
       failure.className = 'business-empty';
@@ -317,8 +322,12 @@ function showPlatformPanel(panelId, tabId) {
     });
   }
 }
-document.getElementById('createBusinessTab').addEventListener('click', () => showPlatformPanel('createBusinessPanel', 'createBusinessTab'));
-document.getElementById('reviewBusinessesTab').addEventListener('click', () => showPlatformPanel('reviewBusinessesPanel', 'reviewBusinessesTab'));
+window.showPlatformPanel = showPlatformPanel;
+document.getElementById('dashboard').addEventListener('click', (event) => {
+  const tab = event.target.closest('#createBusinessTab, #reviewBusinessesTab');
+  if (!tab) return;
+  showPlatformPanel(tab.id === 'reviewBusinessesTab' ? 'reviewBusinessesPanel' : 'createBusinessPanel', tab.id);
+});
 
 document.getElementById('appointmentsTab').addEventListener('click', () => {
   document.getElementById('appointmentsTab').classList.add('active'); document.getElementById('scheduleTab').classList.remove('active');
