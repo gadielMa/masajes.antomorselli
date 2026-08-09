@@ -182,7 +182,6 @@ document.getElementById('cashCancel').addEventListener('click', () => document.g
 document.getElementById('cashForm').addEventListener('submit', async (event) => {
   event.preventDefault();
   const date = document.getElementById('cashDate').value;
-  if (argentinaHoliday(parseDate(date)) || parseDate(date).getDay() === 0) return alert('No se pueden cargar turnos en feriados o domingos.');
   const { error } = await supabaseClient.from('bookings').insert({
     business_id: currentBusiness.id,
     name: document.getElementById('cashName').value.trim(),
