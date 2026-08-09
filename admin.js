@@ -5,6 +5,7 @@ const businessDashboard = document.getElementById('businessDashboard');
 const businessSlug = new URLSearchParams(window.location.search).get('business');
 let currentBusiness = null;
 let scheduleCalendar = null;
+let appointmentsCalendar = null;
 let scheduleRules = [];
 let editingRuleIndex = null;
 const ARGENTINA_HOLIDAYS_2026 = {
@@ -49,6 +50,37 @@ function eventDataForRange(start, end) {
 }
 
 function refreshCalendar() { if (scheduleCalendar) scheduleCalendar.refetchEvents(); }
+
+async function loadAppointmentsCalendar() {
+  const { data: bookings, error } = await supabaseClient
+    .from('bookings')
+    .select('id, name, service, booking_date, booking_time, status, payment_method')
+    .eq('business_id', currentBusiness.id)
+    .in('status', ['pending', 'confirmed', 'cancelled'])
+    .order('booking_date').order('booking_time');
+  if (error) throw error;
+
+  const serviceNames = { descontracturante: 'Descontracturante', relajante: 'Relajante', deportivo: 'Deportivo' };
+  const events = (bookings || []).map((booking) => {
+    const start = `${booking.booking_date}T${booking.booking_time.slice(0, 8)}`;
+    const end = new Date(`${start}-03:00`);
+    end.setMinutes(end.getMinutes() + 60);
+    const paid = booking.payment_method === 'mercadopago' && booking.status === 'confirmed';
+    const cash = booking.payment_method === 'cash';
+    const color = paid ? '#2e9d58' : cash ? '#d84a4a' : '#d49b2a';
+    return { id: `booking-${booking.id}`, title: `${booking.name} · ${serviceNames[booking.service] || booking.service}`, start, end: end.toISOString(), backgroundColor: color, borderColor: color, extendedProps: { booking } };
+  });
+
+  appointmentsCalendar?.destroy();
+  appointmentsCalendar = new FullCalendar.Calendar(document.getElementById('appointmentsCalendar'), {
+    initialView: 'timeGridWeek', initialDate: new Date(), locale: 'es', firstDay: 1, allDaySlot: false,
+    buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día', list: 'Lista' },
+    slotMinTime: '00:00:00', slotMaxTime: '24:00:00', slotDuration: '00:15:00', slotLabelInterval: '01:00:00', height: 'auto',
+    headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' }, events,
+    eventClick: (info) => { const booking = info.event.extendedProps.booking; alert(`${booking.name}\n${serviceNames[booking.service] || booking.service}\n${booking.booking_date} ${booking.booking_time.slice(0, 5)}\nEstado: ${booking.status === 'confirmed' ? 'Confirmado' : booking.status}`); },
+  });
+  appointmentsCalendar.render();
+}
 
 function openScheduleModal({ ruleIndex = null, date, start = '14:00', end = '15:00' }) {
   editingRuleIndex = ruleIndex;
@@ -106,6 +138,7 @@ async function loadBusinessDashboard(user, isPlatformOwner = false) {
     },
   });
   scheduleCalendar.render();
+  await loadAppointmentsCalendar();
   businessDashboard.style.display = 'block';
   return true;
 }
@@ -128,6 +161,43 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
   button.disabled = false; if (error) return showMessage(document.getElementById('loginMessage'), error.message, 'error'); await refreshSession();
 });
 for (const id of ['logoutBtn', 'businessLogoutBtn']) document.getElementById(id).addEventListener('click', async () => { await supabaseClient.auth.signOut(); showView(false); });
+
+document.getElementById('appointmentsTab').addEventListener('click', () => {
+  document.getElementById('appointmentsTab').classList.add('active'); document.getElementById('scheduleTab').classList.remove('active');
+  document.getElementById('appointmentsPanel').classList.add('active'); document.getElementById('schedulePanel').classList.remove('active');
+  appointmentsCalendar?.updateSize();
+});
+document.getElementById('scheduleTab').addEventListener('click', () => {
+  document.getElementById('scheduleTab').classList.add('active'); document.getElementById('appointmentsTab').classList.remove('active');
+  document.getElementById('schedulePanel').classList.add('active'); document.getElementById('appointmentsPanel').classList.remove('active');
+  scheduleCalendar?.updateSize();
+});
+
+document.getElementById('cashBookingButton').addEventListener('click', () => {
+  document.getElementById('cashDate').value = dateOnly(new Date());
+  document.getElementById('cashTime').value = '14:00';
+  document.getElementById('cashModal').classList.add('open');
+});
+document.getElementById('cashCancel').addEventListener('click', () => document.getElementById('cashModal').classList.remove('open'));
+document.getElementById('cashForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const date = document.getElementById('cashDate').value;
+  if (argentinaHoliday(parseDate(date)) || parseDate(date).getDay() === 0) return alert('No se pueden cargar turnos en feriados o domingos.');
+  const { error } = await supabaseClient.from('bookings').insert({
+    business_id: currentBusiness.id,
+    name: document.getElementById('cashName').value.trim(),
+    dni: '0000000',
+    service: document.getElementById('cashService').value,
+    booking_date: date,
+    booking_time: `${document.getElementById('cashTime').value}:00`,
+    status: 'confirmed',
+    payment_method: 'cash',
+  });
+  if (error) return alert(error.code === '23505' ? 'Ese horario ya está ocupado.' : error.message);
+  document.getElementById('cashModal').classList.remove('open');
+  document.getElementById('cashForm').reset();
+  await loadAppointmentsCalendar();
+});
 
 document.getElementById('scheduleCancel').addEventListener('click', closeScheduleModal);
 document.getElementById('scheduleDelete').addEventListener('click', () => { if (editingRuleIndex !== null && confirm('¿Querés eliminar este horario?')) { scheduleRules.splice(editingRuleIndex, 1); closeScheduleModal(); refreshCalendar(); } });

@@ -31,6 +31,19 @@
     .fc-event { background: #8B4B6B; border-color: #8B4B6B; cursor: move; }
     .fc .argentina-holiday { background: rgba(74, 183, 214, .18) !important; }
     .fc .sunday-cell { background: rgba(248, 211, 78, .14) !important; }
+    .business-welcome { margin-bottom: 1.2rem; }
+    .business-welcome h1 { margin: 0; }
+    .panel-tabs { display: flex; gap: .5rem; border-bottom: 1px solid #e4e5e8; margin-bottom: 1.2rem; }
+    .panel-tab { border: 0; background: transparent; color: #666; padding: .8rem 1rem; cursor: pointer; font: inherit; font-weight: 600; border-bottom: 3px solid transparent; }
+    .panel-tab.active { color: #8B4B6B; border-bottom-color: #8B4B6B; }
+    .panel-section { display: none; }
+    .panel-section.active { display: block; }
+    .calendar-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin: .8rem 0 1rem; color: #555; font-size: .9rem; }
+    .legend-item { display: inline-flex; align-items: center; gap: .4rem; }
+    .legend-dot { width: .8rem; height: .8rem; border-radius: 50%; }
+    .legend-paid { background: #2e9d58; }
+    .legend-cash { background: #d84a4a; }
+    .legend-pending { background: #d49b2a; }
     .schedule-modal { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; padding: 1rem; background: rgba(35,25,31,.45); }
     .schedule-modal.open { display: flex; }
     .schedule-dialog { width: min(560px, 100%); max-height: calc(100vh - 2rem); overflow-y: auto; background: white; border-radius: 16px; padding: 1.75rem; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
@@ -71,13 +84,23 @@
     </section>
 
     <section id="businessDashboard" class="admin-card">
-      <div class="admin-topbar"><div><h1 id="businessTitle">Mi negocio</h1><p>Configurá los días y horarios disponibles.</p></div><button id="businessLogoutBtn" class="logout">Cerrar sesión</button></div>
-      <div class="calendar-help">Hacé clic en un día para crear un turno de una hora. Arrastrá el bloque o sus bordes para cambiarlo. Hacé clic sobre un bloque para eliminarlo.</div>
-      <div id="hoursCalendar"></div>
-      <form id="hoursForm" class="admin-form">
-        <button type="submit">Guardar horarios</button>
-      </form>
-      <div id="hoursMessage" class="admin-message"></div>
+      <div class="admin-topbar business-welcome"><div><h1>Bienvenido, <span id="businessTitle">Induliru</span></h1><p>Gestioná tus turnos y horarios.</p></div><button id="businessLogoutBtn" class="logout">Cerrar sesión</button></div>
+      <nav class="panel-tabs" aria-label="Secciones del negocio">
+        <button id="appointmentsTab" class="panel-tab active" type="button">Turnos</button>
+        <button id="scheduleTab" class="panel-tab" type="button">Editar horarios disponibles</button>
+      </nav>
+      <section id="appointmentsPanel" class="panel-section active">
+        <button id="cashBookingButton" class="schedule-save" type="button" style="border:0;border-radius:8px;padding:.75rem 1rem;cursor:pointer;font:inherit;font-weight:600;color:#fff;background:#d84a4a;">+ Agregar turno en efectivo</button>
+        <div class="calendar-legend"><span class="legend-item"><i class="legend-dot legend-paid"></i>Pagado con Mercado Pago</span><span class="legend-item"><i class="legend-dot legend-cash"></i>Pago en efectivo</span><span class="legend-item"><i class="legend-dot legend-pending"></i>Pendiente</span></div>
+        <div id="appointmentsCalendar"></div>
+        <div id="appointmentsMessage" class="admin-message"></div>
+      </section>
+      <section id="schedulePanel" class="panel-section">
+        <div class="calendar-help">Seleccioná un rango para crear un horario. Arrastrá el bloque o sus bordes para cambiarlo. Hacé clic sobre un bloque para editarlo.</div>
+        <div id="hoursCalendar"></div>
+        <form id="hoursForm" class="admin-form"><button type="submit">Guardar horarios</button></form>
+        <div id="hoursMessage" class="admin-message"></div>
+      </section>
     </section>
   </main>
   <div id="scheduleModal" class="schedule-modal" role="dialog" aria-modal="true">
@@ -99,6 +122,17 @@
         <label>Repetir hasta (opcional)<input id="scheduleUntil" type="date"></label>
       </div>
       <div class="schedule-actions"><button id="scheduleDelete" class="schedule-delete" type="button">Eliminar</button><span><button id="scheduleCancel" class="schedule-cancel" type="button">Cancelar</button> <button class="schedule-save" type="submit">Guardar</button></span></div>
+    </form>
+  </div>
+  <div id="cashModal" class="schedule-modal" role="dialog" aria-modal="true">
+    <form id="cashForm" class="schedule-dialog">
+      <h2>Agregar turno en efectivo</h2>
+      <div class="admin-form">
+        <label>Nombre del cliente<input id="cashName" required></label>
+        <label>Servicio<select id="cashService" required><option value="descontracturante">Masaje Descontracturante</option><option value="relajante">Masaje Relajante</option><option value="deportivo">Masaje Deportivo</option></select></label>
+        <div class="schedule-grid"><label>Fecha<input id="cashDate" type="date" required></label><label>Horario<input id="cashTime" type="time" step="900" required></label></div>
+      </div>
+      <div class="schedule-actions"><span></span><span><button id="cashCancel" class="schedule-cancel" type="button">Cancelar</button> <button class="schedule-save" type="submit">Guardar turno</button></span></div>
     </form>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
