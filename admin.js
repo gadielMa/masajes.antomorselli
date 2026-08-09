@@ -23,7 +23,7 @@ const ARGENTINA_HOLIDAYS_2026 = {
 function argentinaHoliday(date) { return ARGENTINA_HOLIDAYS_2026[dateOnly(date)] || null; }
 
 function showMessage(element, message, type) { element.textContent = message; element.className = `admin-message ${type}`; }
-function showView(authenticated) { loginView.style.display = authenticated ? 'none' : 'block'; dashboard.style.display = 'none'; businessDashboard.style.display = 'none'; document.getElementById('clientsPanel').classList.remove('active'); }
+function showView(authenticated) { loginView.style.display = authenticated ? 'none' : 'block'; dashboard.style.display = 'none'; businessDashboard.style.display = 'none'; document.getElementById('clientsPanel').classList.remove('active'); document.getElementById('billingPanel').classList.remove('active'); }
 function dateOnly(date) { return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
 function parseDate(value) { return new Date(`${value}T12:00:00`); }
 function addDays(date, days) { const next = new Date(date); next.setDate(next.getDate() + days); return next; }
@@ -99,6 +99,29 @@ async function loadClients() {
     const remove = document.createElement('button'); remove.className = 'client-action client-delete'; remove.dataset.action = 'delete'; remove.dataset.id = client.id; remove.dataset.name = client.name; remove.dataset.dni = client.dni; remove.textContent = 'Eliminar';
     actions.append(edit, remove); row.append(name, dni, actions); list.appendChild(row);
   });
+}
+
+function formatMoney(value) { return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value); }
+async function loadBilling() {
+  const month = document.getElementById('billingMonth').value || dateOnly(new Date()).slice(0, 7);
+  document.getElementById('billingMonth').value = month;
+  const [year, monthNumber] = month.split('-').map(Number);
+  const start = `${month}-01`;
+  const next = new Date(year, monthNumber, 1);
+  const end = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-01`;
+  const { data, error } = await supabaseClient.from('bookings').select('name, service, status, payment_method').eq('business_id', currentBusiness.id).eq('status', 'confirmed').gte('booking_date', start).lt('booking_date', end);
+  if (error) throw error;
+  const prices = { descontracturante: 30000, relajante: 25000, deportivo: 35000 };
+  const names = { descontracturante: 'Descontracturante', relajante: 'Relajante', deportivo: 'Deportivo' };
+  const paid = (data || []).filter((booking) => booking.payment_method !== 'pending');
+  const total = paid.reduce((sum, booking) => sum + (prices[booking.service] || 0), 0);
+  document.getElementById('billingTotal').textContent = formatMoney(total);
+  document.getElementById('billingCount').textContent = String(paid.length);
+  document.getElementById('billingAverage').textContent = formatMoney(paid.length ? total / paid.length : 0);
+  const byService = {}; const byClient = {};
+  paid.forEach((booking) => { const service = booking.service; const client = booking.name; byService[service] ||= { count: 0, total: 0 }; byClient[client] ||= { count: 0, total: 0 }; byService[service].count++; byService[service].total += prices[service] || 0; byClient[client].count++; byClient[client].total += prices[service] || 0; });
+  const fillRows = (elementId, rows, labelNames) => { const body = document.getElementById(elementId); body.replaceChildren(); Object.entries(rows).sort((a, b) => b[1].total - a[1].total).forEach(([label, values]) => { const row = document.createElement('tr'); const name = document.createElement('td'); name.textContent = labelNames?.[label] || label; const count = document.createElement('td'); count.textContent = values.count; const amount = document.createElement('td'); amount.textContent = formatMoney(values.total); row.append(name, count, amount); body.appendChild(row); }); };
+  fillRows('billingServices', byService, names); fillRows('billingClients', byClient);
 }
 
 function openScheduleModal({ ruleIndex = null, date, start = '14:00', end = '15:00' }) {
@@ -188,18 +211,24 @@ for (const id of ['logoutBtn', 'businessLogoutBtn']) document.getElementById(id)
 
 document.getElementById('appointmentsTab').addEventListener('click', () => {
   document.getElementById('appointmentsTab').classList.add('active'); document.getElementById('scheduleTab').classList.remove('active');
-  document.getElementById('clientsTab').classList.remove('active'); document.getElementById('appointmentsPanel').classList.add('active'); document.getElementById('schedulePanel').classList.remove('active'); document.getElementById('clientsPanel').classList.remove('active');
+  document.getElementById('clientsTab').classList.remove('active'); document.getElementById('billingTab').classList.remove('active'); document.getElementById('appointmentsPanel').classList.add('active'); document.getElementById('schedulePanel').classList.remove('active'); document.getElementById('clientsPanel').classList.remove('active'); document.getElementById('billingPanel').classList.remove('active');
   appointmentsCalendar?.updateSize();
 });
 document.getElementById('scheduleTab').addEventListener('click', () => {
-  document.getElementById('scheduleTab').classList.add('active'); document.getElementById('appointmentsTab').classList.remove('active'); document.getElementById('clientsTab').classList.remove('active');
-  document.getElementById('schedulePanel').classList.add('active'); document.getElementById('appointmentsPanel').classList.remove('active'); document.getElementById('clientsPanel').classList.remove('active');
+  document.getElementById('scheduleTab').classList.add('active'); document.getElementById('appointmentsTab').classList.remove('active'); document.getElementById('clientsTab').classList.remove('active'); document.getElementById('billingTab').classList.remove('active');
+  document.getElementById('schedulePanel').classList.add('active'); document.getElementById('appointmentsPanel').classList.remove('active'); document.getElementById('clientsPanel').classList.remove('active'); document.getElementById('billingPanel').classList.remove('active');
   scheduleCalendar?.updateSize();
 });
 document.getElementById('clientsTab').addEventListener('click', () => {
-  document.getElementById('clientsTab').classList.add('active'); document.getElementById('appointmentsTab').classList.remove('active'); document.getElementById('scheduleTab').classList.remove('active');
-  document.getElementById('clientsPanel').classList.add('active'); document.getElementById('appointmentsPanel').classList.remove('active'); document.getElementById('schedulePanel').classList.remove('active');
+  document.getElementById('clientsTab').classList.add('active'); document.getElementById('appointmentsTab').classList.remove('active'); document.getElementById('scheduleTab').classList.remove('active'); document.getElementById('billingTab').classList.remove('active');
+  document.getElementById('clientsPanel').classList.add('active'); document.getElementById('appointmentsPanel').classList.remove('active'); document.getElementById('schedulePanel').classList.remove('active'); document.getElementById('billingPanel').classList.remove('active');
 });
+document.getElementById('billingTab').addEventListener('click', async () => {
+  document.getElementById('billingTab').classList.add('active'); document.getElementById('appointmentsTab').classList.remove('active'); document.getElementById('scheduleTab').classList.remove('active'); document.getElementById('clientsTab').classList.remove('active');
+  document.getElementById('billingPanel').classList.add('active'); document.getElementById('appointmentsPanel').classList.remove('active'); document.getElementById('schedulePanel').classList.remove('active'); document.getElementById('clientsPanel').classList.remove('active');
+  try { await loadBilling(); } catch (error) { showMessage(document.getElementById('appointmentsMessage'), error.message, 'error'); }
+});
+document.getElementById('billingMonth').addEventListener('change', () => loadBilling());
 
 document.getElementById('clientForm').addEventListener('submit', async (event) => {
   event.preventDefault();

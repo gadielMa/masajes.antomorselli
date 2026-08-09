@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Administración - Masajes</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
   <style>
     .admin-page { min-height: 100vh; padding: 0 0 1rem; background: #fbf8f3; }
@@ -62,6 +63,15 @@
     .client-edit { background: #d0e9d7; color: #4f805f; }
     .client-delete { background: #b8d8c1; color: #365447; }
     #appointmentsPanel #cashBookingButton { background: #e4b1c0 !important; color: #6e4251 !important; }
+    #schedulePanel #hoursForm button { background: #a9d4dc; color: #426b75; }
+    .billing-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1rem 0; }
+    .billing-card { background: #eef8fa; border-radius: 12px; padding: 1rem; }
+    .billing-card small { display: block; color: #66828a; }
+    .billing-card strong { display: block; margin-top: .35rem; color: #426b75; font-size: 1.35rem; }
+    .billing-table { width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; }
+    .billing-table th, .billing-table td { padding: .65rem; text-align: left; border-bottom: 1px solid #e5edef; }
+    .billing-table th { color: #527985; }
+    @media (max-width: 700px) { .billing-summary { grid-template-columns: 1fr; } }
     .admin-footer { text-align: center; color: #82939a; font-size: .85rem; line-height: 1.6; padding: .75rem 0; }
     .admin-footer a { color: inherit; text-decoration: none; margin: 0 .35rem; }
     body.dark-mode .admin-page { background: #1e2930; }
@@ -80,6 +90,9 @@
     body.dark-mode .clients-table th, body.dark-mode .clients-table td { border-color: #526873; color: #e8eef0; }
     body.dark-mode .client-edit { background: #365447; color: #c9e6d1; }
     body.dark-mode .client-delete { background: #47705a; color: #e4f4e8; }
+    body.dark-mode .billing-card { background: #294750; }
+    body.dark-mode .billing-card small, body.dark-mode .billing-card strong, body.dark-mode .billing-table th, body.dark-mode .billing-table td { color: #d6e6e9; }
+    body.dark-mode .billing-table th, body.dark-mode .billing-table td { border-color: #526873; }
     body.dark-mode .admin-footer { background: #1e2930; color: #9eb1b7; }
     body.dark-mode .calendar-legend { color: #c2d0d4; }
     body.dark-mode .fc { color: #e8eef0; }
@@ -148,6 +161,7 @@
         <button id="appointmentsTab" class="panel-tab tab-turnos active" type="button">Turnos</button>
         <button id="scheduleTab" class="panel-tab tab-horarios" type="button">Editar horarios disponibles</button>
         <button id="clientsTab" class="panel-tab tab-clientes" type="button">Clientes</button>
+        <button id="billingTab" class="panel-tab tab-horarios" type="button">Facturación</button>
       </nav>
       <section id="appointmentsPanel" class="panel-section active">
         <button id="cashBookingButton" class="schedule-save" type="button" style="border:0;border-radius:8px;padding:.75rem 1rem;cursor:pointer;font:inherit;font-weight:600;">+ Agregar turno manual</button>
@@ -174,9 +188,17 @@
         <div id="clientsMessage" class="admin-message"></div>
         <table class="clients-table"><thead><tr><th>Nombre</th><th>DNI</th><th>Acciones</th></tr></thead><tbody id="clientsList"></tbody></table>
       </section>
+      <section id="billingPanel" class="panel-section">
+        <h2>Facturación</h2>
+        <p>Resumen de turnos cobrados durante el mes seleccionado.</p>
+        <label>Mes <input id="billingMonth" type="month"></label>
+        <div class="billing-summary"><div class="billing-card"><small>Total facturado</small><strong id="billingTotal">$0</strong></div><div class="billing-card"><small>Turnos cobrados</small><strong id="billingCount">0</strong></div><div class="billing-card"><small>Ticket promedio</small><strong id="billingAverage">$0</strong></div></div>
+        <h3>Por tipo de masaje</h3><table class="billing-table"><thead><tr><th>Servicio</th><th>Turnos</th><th>Total</th></tr></thead><tbody id="billingServices"></tbody></table>
+        <h3>Por cliente</h3><table class="billing-table"><thead><tr><th>Cliente</th><th>Turnos</th><th>Total</th></tr></thead><tbody id="billingClients"></tbody></table>
+      </section>
     </section>
   </main>
-  <footer class="admin-footer">Hecho por <strong>Induliru.tech</strong><br><a href="https://wa.me/5491172657749" target="_blank" rel="noopener">WhatsApp: +54 9 11 7265-7749</a> · <a href="https://www.instagram.com/induliru.tech/" target="_blank" rel="noopener">Instagram: @induliru.tech</a> · <a href="mailto:hola@induliru.com">Email: hola@induliru.com</a></footer>
+  <footer class="admin-footer">Hecho por <strong>Induliru.tech</strong><br><a href="https://wa.me/5491172657749" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i> WhatsApp</a> · <a href="https://www.instagram.com/induliru.tech/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i> Instagram</a> · <a href="mailto:hola@induliru.com"><i class="fas fa-envelope"></i> Email</a></footer>
   <div id="scheduleModal" class="schedule-modal" role="dialog" aria-modal="true">
     <form id="scheduleForm" class="schedule-dialog">
       <h2 id="scheduleModalTitle">Nuevo horario</h2>
