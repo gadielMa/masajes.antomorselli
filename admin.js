@@ -122,6 +122,7 @@ async function loadBusinessDashboard(user, isPlatformOwner = false) {
 
   currentBusiness = business;
   document.getElementById('businessTitle').textContent = business.name;
+  businessDashboard.style.display = 'block';
   let { data: rules, error: rulesError } = await supabaseClient.from('availability_rules').select('*').eq('business_id', business.id).order('start_date');
   if (rulesError) throw rulesError;
   scheduleRules = rules || [];
@@ -154,7 +155,10 @@ async function loadBusinessDashboard(user, isPlatformOwner = false) {
   scheduleCalendar.render();
   await loadAppointmentsCalendar();
   await loadClients();
-  businessDashboard.style.display = 'block';
+  requestAnimationFrame(() => {
+    scheduleCalendar?.updateSize();
+    appointmentsCalendar?.updateSize();
+  });
   return true;
 }
 
