@@ -335,3 +335,17 @@ document.getElementById('createForm').addEventListener('submit', async (event) =
 });
 
 refreshSession();
+
+function applyDarkMode(enabled) {
+  document.body.classList.toggle('dark-mode', enabled);
+  document.querySelectorAll('.dark-mode-toggle').forEach((button) => {
+    button.textContent = enabled ? '☀' : '☾';
+    button.setAttribute('aria-label', enabled ? 'Desactivar modo oscuro' : 'Activar modo oscuro');
+  });
+}
+applyDarkMode(localStorage.getItem('adminDarkMode') === 'true');
+document.querySelectorAll('.dark-mode-toggle').forEach((button) => button.addEventListener('click', () => {
+  const enabled = !document.body.classList.contains('dark-mode');
+  localStorage.setItem('adminDarkMode', String(enabled));
+  applyDarkMode(enabled);
+}));
