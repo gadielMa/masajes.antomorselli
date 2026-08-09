@@ -87,7 +87,7 @@ async function loadAppointmentsCalendar() {
 }
 
 async function loadClients() {
-  const { data, error } = await supabaseClient.from('clients').select('id, name, dni').eq('business_id', currentBusiness.id).order('name');
+  const { data, error } = await supabaseClient.from('clients').select('id, name, dni, email, whatsapp').eq('business_id', currentBusiness.id).order('name');
   if (error) throw error;
   const list = document.getElementById('clientsList');
   list.replaceChildren();
@@ -95,10 +95,18 @@ async function loadClients() {
     const row = document.createElement('tr');
     const name = document.createElement('td'); name.textContent = client.name;
     const dni = document.createElement('td'); dni.textContent = client.dni;
+    const contact = document.createElement('td'); contact.className = 'client-contact';
+    if (client.email) {
+      const email = document.createElement('a'); email.className = 'client-email-link'; email.href = `mailto:${client.email}`; email.title = `Enviar email a ${client.email}`; email.innerHTML = '<i class="fas fa-envelope"></i>'; contact.appendChild(email);
+    }
+    if (client.whatsapp) {
+      const whatsapp = document.createElement('a'); whatsapp.className = 'client-whatsapp-link'; whatsapp.href = `https://wa.me/${String(client.whatsapp).replace(/\D/g, '')}`; whatsapp.target = '_blank'; whatsapp.rel = 'noopener'; whatsapp.title = `Abrir WhatsApp de ${client.whatsapp}`; whatsapp.innerHTML = '<i class="fab fa-whatsapp"></i>'; contact.appendChild(whatsapp);
+    }
+    if (!client.email && !client.whatsapp) contact.textContent = '—';
     const actions = document.createElement('td'); actions.className = 'client-actions';
-    const edit = document.createElement('button'); edit.className = 'client-action client-edit'; edit.dataset.action = 'edit'; edit.dataset.id = client.id; edit.dataset.name = client.name; edit.dataset.dni = client.dni; edit.textContent = 'Editar';
+    const edit = document.createElement('button'); edit.className = 'client-action client-edit'; edit.dataset.action = 'edit'; edit.dataset.id = client.id; edit.dataset.name = client.name; edit.dataset.dni = client.dni; edit.dataset.email = client.email || ''; edit.dataset.whatsapp = client.whatsapp || ''; edit.textContent = 'Editar';
     const remove = document.createElement('button'); remove.className = 'client-action client-delete'; remove.dataset.action = 'delete'; remove.dataset.id = client.id; remove.dataset.name = client.name; remove.dataset.dni = client.dni; remove.textContent = 'Eliminar';
-    actions.append(edit, remove); row.append(name, dni, actions); list.appendChild(row);
+    actions.append(edit, remove); row.append(name, dni, contact, actions); list.appendChild(row);
   });
 }
 
@@ -355,9 +363,11 @@ document.getElementById('clientForm').addEventListener('submit', async (event) =
   event.preventDefault();
   const name = document.getElementById('clientName').value.trim();
   const dni = document.getElementById('clientDni').value.trim();
+  const email = document.getElementById('clientEmail').value.trim().toLowerCase() || null;
+  const whatsapp = document.getElementById('clientWhatsapp').value.trim() || null;
   const message = document.getElementById('clientsMessage');
   if (!/^\d{7,8}$/.test(dni)) return showMessage(message, 'El DNI debe tener 7 u 8 dígitos.', 'error');
-  const { error } = await supabaseClient.from('clients').upsert({ business_id: currentBusiness.id, name, dni }, { onConflict: 'business_id,dni' });
+  const { error } = await supabaseClient.from('clients').upsert({ business_id: currentBusiness.id, name, dni, email, whatsapp }, { onConflict: 'business_id,dni' });
   if (error) return showMessage(message, error.message, 'error');
   showMessage(message, 'Cliente guardado correctamente.', 'success');
   event.target.reset();
@@ -403,6 +413,8 @@ document.getElementById('clientsList').addEventListener('click', async (event) =
     editingClientId = id;
     document.getElementById('editClientName').value = button.dataset.name;
     document.getElementById('editClientDni').value = button.dataset.dni;
+    document.getElementById('editClientEmail').value = button.dataset.email;
+    document.getElementById('editClientWhatsapp').value = button.dataset.whatsapp;
     const { data: bookings } = await supabaseClient.from('bookings').select('id').eq('business_id', currentBusiness.id).eq('dni', button.dataset.dni).limit(1);
     const hasBookings = Boolean(bookings?.length);
     document.getElementById('editClientDni').readOnly = hasBookings;
@@ -415,7 +427,7 @@ document.getElementById('clientsList').addEventListener('click', async (event) =
 document.getElementById('clientEditCancel').addEventListener('click', () => { document.getElementById('clientEditModal').classList.remove('open'); editingClientId = null; });
 document.getElementById('clientEditForm').addEventListener('submit', async (event) => {
   event.preventDefault();
-  const { error } = await supabaseClient.from('clients').update({ name: document.getElementById('editClientName').value.trim(), dni: document.getElementById('editClientDni').value.trim() }).eq('id', editingClientId).eq('business_id', currentBusiness.id);
+  const { error } = await supabaseClient.from('clients').update({ name: document.getElementById('editClientName').value.trim(), dni: document.getElementById('editClientDni').value.trim(), email: document.getElementById('editClientEmail').value.trim().toLowerCase() || null, whatsapp: document.getElementById('editClientWhatsapp').value.trim() || null }).eq('id', editingClientId).eq('business_id', currentBusiness.id);
   if (error) return showMessage(document.getElementById('clientsMessage'), error.message, 'error');
   document.getElementById('clientEditModal').classList.remove('open'); editingClientId = null; await loadClients();
 });

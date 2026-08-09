@@ -74,11 +74,15 @@
     .clients-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
     .clients-table th, .clients-table td { padding: .75rem; text-align: left; border-bottom: 1px solid #eee; }
     .clients-table th { color: #684054; }
-    .client-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: .7rem; align-items: end; margin-top: 1rem; }
+    .client-form { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: .7rem; align-items: end; margin-top: 1rem; }
     .client-form button { border: 0; border-radius: 8px; padding: .85rem 1rem; background: #a9cfbb; color: #365447; cursor: pointer; font: inherit; font-weight: 600; }
     .client-form label { display: grid; gap: .35rem; color: #2c3e50; font-weight: 600; }
     .client-form input { padding: .85rem 1rem; border: 1px solid #d8dce2; border-radius: 9px; font: inherit; min-width: 0; }
     .client-actions { display: flex; gap: .4rem; }
+    .client-contact { display: flex; gap: .45rem; flex-wrap: wrap; }
+    .client-contact a { text-decoration: none; font-size: .85rem; }
+    .client-email-link { color: #d85d59; }
+    .client-whatsapp-link { color: #1f9d55; }
     .client-action { border: 0; border-radius: 6px; padding: .4rem .6rem; cursor: pointer; font: inherit; font-size: .85rem; }
     .client-edit { background: #d0e9d7; color: #4f805f; }
     .client-delete { background: #b8d8c1; color: #365447; }
@@ -229,10 +233,12 @@
         <form id="clientForm" class="client-form">
           <label>Nombre<input id="clientName" required></label>
           <label>DNI<input id="clientDni" inputmode="numeric" pattern="[0-9]{7,8}" minlength="7" maxlength="8" required></label>
+          <label>Email<input id="clientEmail" type="email" autocomplete="email"></label>
+          <label>WhatsApp<input id="clientWhatsapp" type="tel" inputmode="tel" placeholder="54911..." autocomplete="tel"></label>
           <button type="submit">Agregar cliente</button>
         </form>
         <div id="clientsMessage" class="admin-message"></div>
-        <table class="clients-table"><thead><tr><th>Nombre</th><th>DNI</th><th>Acciones</th></tr></thead><tbody id="clientsList"></tbody></table>
+        <table class="clients-table"><thead><tr><th>Nombre</th><th>DNI</th><th>Contacto</th><th>Acciones</th></tr></thead><tbody id="clientsList"></tbody></table>
       </section>
       <section id="billingPanel" class="panel-section">
         <h2>Facturación</h2>
@@ -282,7 +288,7 @@
   <div id="clientEditModal" class="schedule-modal" role="dialog" aria-modal="true">
     <form id="clientEditForm" class="client-dialog">
       <h2>Editar cliente</h2>
-      <div class="admin-form"><label>Nombre<input id="editClientName" required></label><label>DNI<input id="editClientDni" inputmode="numeric" pattern="[0-9]{7,8}" minlength="7" maxlength="8" required></label><div id="editClientNotice" class="client-readonly" style="display:none"></div></div>
+      <div class="admin-form"><label>Nombre<input id="editClientName" required></label><label>DNI<input id="editClientDni" inputmode="numeric" pattern="[0-9]{7,8}" minlength="7" maxlength="8" required></label><label>Email<input id="editClientEmail" type="email" autocomplete="email"></label><label>WhatsApp<input id="editClientWhatsapp" type="tel" inputmode="tel" autocomplete="tel"></label><div id="editClientNotice" class="client-readonly" style="display:none"></div></div>
       <div class="client-dialog-actions"><button id="clientEditCancel" class="client-secondary" type="button">Cancelar</button><button class="client-primary" type="submit">Guardar cambios</button></div>
     </form>
   </div>
