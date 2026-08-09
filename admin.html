@@ -7,9 +7,9 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
   <style>
-    .admin-page { min-height: 100vh; padding: 0 1.5rem 1rem; background: #fbf8f3; }
+    .admin-page { min-height: 100vh; padding: 0 0 1rem; background: #fbf8f3; }
     .admin-card { max-width: 680px; margin: 0 auto; background: #fffdf9; padding: 2rem; border-radius: 18px; box-shadow: 0 10px 35px rgba(111,139,151,.12); }
-    #businessDashboard { max-width: 1100px; }
+    #businessDashboard { width: 100%; max-width: none; margin: 0; padding: 0 0 2rem; border-radius: 0; box-shadow: none; }
     .admin-card h1 { color: #3f4b56; margin-bottom: .5rem; }
     .admin-card p { color: #666; margin-bottom: 1.5rem; }
     .admin-form { display: grid; gap: 1rem; }
@@ -32,8 +32,9 @@
     .fc-event { background: #d4a7b7; border-color: #d4a7b7; cursor: move; }
     .fc .argentina-holiday { background: rgba(74, 183, 214, .18) !important; }
     .fc .sunday-cell { background: rgba(125, 137, 145, .16) !important; }
-    .business-welcome { margin-bottom: 1.2rem; padding-top: 1.25rem; }
+    .business-welcome { margin: 0 0 1.2rem; padding: 1rem max(1.25rem, calc((100vw - 1100px) / 2)); background: #e7e8ea; }
     .business-welcome h1 { margin: 0; }
+    .panel-tabs, .panel-section { width: calc(100% - 2rem); max-width: 1100px; margin-left: auto; margin-right: auto; }
     .panel-tabs { display: flex; gap: .5rem; border-bottom: 1px solid #e4e5e8; margin-bottom: 1.2rem; }
     .panel-tab { border: 0; background: transparent; color: #666; padding: .8rem 1rem; cursor: pointer; font: inherit; font-weight: 600; border-bottom: 3px solid transparent; }
     .panel-tab.tab-turnos.active { color: #a56f86; background: #f8e9ef; border-bottom-color: #d4a7b7; }
@@ -60,6 +61,8 @@
     .client-delete { background: #fdecec; color: #a52b2b; }
     .admin-footer { text-align: center; color: #82939a; font-size: .85rem; padding: 1rem 0 .25rem; }
     body.dark-mode .admin-page { background: #1e2930; }
+    body.dark-mode .business-welcome { background: #3b4449; }
+    body.dark-mode .business-welcome h1, body.dark-mode .business-welcome p { color: #f0f5f6; }
     body.dark-mode .admin-card, body.dark-mode .schedule-dialog, body.dark-mode .client-dialog { background: #293840; color: #e8eef0; }
     body.dark-mode .admin-card h1, body.dark-mode .schedule-dialog h2, body.dark-mode .client-dialog h2 { color: #f0f5f6; }
     body.dark-mode .admin-card p, body.dark-mode .admin-form label, body.dark-mode .client-form label { color: #c2d0d4; }

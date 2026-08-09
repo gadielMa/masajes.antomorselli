@@ -334,8 +334,6 @@ document.getElementById('createForm').addEventListener('submit', async (event) =
   const result = await response.json().catch(() => ({})); button.disabled = false; if (!response.ok) return showMessage(message, result.error || 'No se pudo crear la cuenta', 'error'); showMessage(message, `Cuenta creada para ${result.admin.email}. Negocio: ${result.business.slug}`, 'success'); form.reset();
 });
 
-refreshSession();
-
 function applyDarkMode(enabled) {
   document.body.classList.toggle('dark-mode', enabled);
   document.querySelectorAll('.dark-mode-toggle').forEach((button) => {
@@ -349,3 +347,5 @@ document.querySelectorAll('.dark-mode-toggle').forEach((button) => button.addEve
   localStorage.setItem('adminDarkMode', String(enabled));
   applyDarkMode(enabled);
 }));
+
+refreshSession();
