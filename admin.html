@@ -44,6 +44,7 @@
     .legend-paid { background: #2e9d58; }
     .legend-cash { background: #d84a4a; }
     .legend-pending { background: #d49b2a; }
+    .early-hours-toggle { border: 1px solid #8B4B6B; background: #fff; color: #8B4B6B; border-radius: 8px; padding: .55rem .8rem; cursor: pointer; font: inherit; font-weight: 600; margin: .7rem 0; }
     .schedule-modal { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; padding: 1rem; background: rgba(35,25,31,.45); }
     .schedule-modal.open { display: flex; }
     .schedule-dialog { width: min(560px, 100%); max-height: calc(100vh - 2rem); overflow-y: auto; background: white; border-radius: 16px; padding: 1.75rem; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
@@ -92,11 +93,13 @@
       <section id="appointmentsPanel" class="panel-section active">
         <button id="cashBookingButton" class="schedule-save" type="button" style="border:0;border-radius:8px;padding:.75rem 1rem;cursor:pointer;font:inherit;font-weight:600;color:#fff;background:#d84a4a;">+ Agregar turno en efectivo</button>
         <div class="calendar-legend"><span class="legend-item"><i class="legend-dot legend-paid"></i>Pagado con Mercado Pago</span><span class="legend-item"><i class="legend-dot legend-cash"></i>Pago en efectivo</span><span class="legend-item"><i class="legend-dot legend-pending"></i>Pendiente</span></div>
+        <button id="appointmentsEarlyHours" class="early-hours-toggle" type="button">Mostrar 00:00–06:00</button>
         <div id="appointmentsCalendar"></div>
         <div id="appointmentsMessage" class="admin-message"></div>
       </section>
       <section id="schedulePanel" class="panel-section">
         <div class="calendar-help">Seleccioná un rango para crear un horario. Arrastrá el bloque o sus bordes para cambiarlo. Hacé clic sobre un bloque para editarlo.</div>
+        <button id="scheduleEarlyHours" class="early-hours-toggle" type="button">Mostrar 00:00–06:00</button>
         <div id="hoursCalendar"></div>
         <form id="hoursForm" class="admin-form"><button type="submit">Guardar horarios</button></form>
         <div id="hoursMessage" class="admin-message"></div>
@@ -129,6 +132,7 @@
       <h2>Agregar turno en efectivo</h2>
       <div class="admin-form">
         <label>Nombre del cliente<input id="cashName" required></label>
+        <label>Estado del pago<select id="cashPaymentMethod" required><option value="cash">Pago en efectivo</option><option value="pending">Pendiente</option></select></label>
         <label>Servicio<select id="cashService" required><option value="descontracturante">Masaje Descontracturante</option><option value="relajante">Masaje Relajante</option><option value="deportivo">Masaje Deportivo</option></select></label>
         <div class="schedule-grid"><label>Fecha<input id="cashDate" type="date" required></label><label>Horario<input id="cashTime" type="time" step="900" required></label></div>
       </div>

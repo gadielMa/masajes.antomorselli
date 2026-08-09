@@ -8,6 +8,7 @@ let scheduleCalendar = null;
 let appointmentsCalendar = null;
 let scheduleRules = [];
 let editingRuleIndex = null;
+const earlyHoursVisible = { appointments: false, schedule: false };
 const ARGENTINA_HOLIDAYS_2026 = {
   '2026-01-01': 'Año Nuevo', '2026-02-16': 'Carnaval', '2026-02-17': 'Carnaval',
   '2026-03-23': 'Feriado turístico', '2026-03-24': 'Día Nacional de la Memoria',
@@ -75,7 +76,7 @@ async function loadAppointmentsCalendar() {
   appointmentsCalendar = new FullCalendar.Calendar(document.getElementById('appointmentsCalendar'), {
     initialView: 'timeGridWeek', initialDate: new Date(), locale: 'es', firstDay: 1, allDaySlot: false,
     buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día', list: 'Lista' },
-    slotMinTime: '00:00:00', slotMaxTime: '24:00:00', slotDuration: '00:15:00', slotLabelInterval: '01:00:00', height: 'auto',
+    slotMinTime: '06:00:00', slotMaxTime: '24:00:00', slotDuration: '00:15:00', slotLabelInterval: '01:00:00', height: 'auto',
     headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' }, events,
     eventClick: (info) => { const booking = info.event.extendedProps.booking; alert(`${booking.name}\n${serviceNames[booking.service] || booking.service}\n${booking.booking_date} ${booking.booking_time.slice(0, 5)}\nEstado: ${booking.status === 'confirmed' ? 'Confirmado' : booking.status}`); },
   });
@@ -115,7 +116,7 @@ async function loadBusinessDashboard(user, isPlatformOwner = false) {
   scheduleCalendar = new FullCalendar.Calendar(document.getElementById('hoursCalendar'), {
     initialView: 'timeGridWeek', initialDate: new Date(), locale: 'es', firstDay: 1, allDaySlot: false,
     buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día', list: 'Lista' },
-    slotMinTime: '00:00:00', slotMaxTime: '24:00:00', slotDuration: '00:15:00', snapDuration: '00:15:00', slotLabelInterval: '01:00:00', height: 'auto', editable: true, selectable: true,
+    slotMinTime: '06:00:00', slotMaxTime: '24:00:00', slotDuration: '00:15:00', snapDuration: '00:15:00', slotLabelInterval: '01:00:00', height: 'auto', editable: true, selectable: true,
     headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
     events: (info, success) => success(eventDataForRange(info.start, info.end)),
     dayCellClassNames: (info) => {
@@ -173,6 +174,14 @@ document.getElementById('scheduleTab').addEventListener('click', () => {
   scheduleCalendar?.updateSize();
 });
 
+function toggleEarlyHours(kind, calendar, button) {
+  earlyHoursVisible[kind] = !earlyHoursVisible[kind];
+  calendar?.setOption('slotMinTime', earlyHoursVisible[kind] ? '00:00:00' : '06:00:00');
+  button.textContent = earlyHoursVisible[kind] ? 'Ocultar 00:00–06:00' : 'Mostrar 00:00–06:00';
+}
+document.getElementById('appointmentsEarlyHours').addEventListener('click', (event) => toggleEarlyHours('appointments', appointmentsCalendar, event.currentTarget));
+document.getElementById('scheduleEarlyHours').addEventListener('click', (event) => toggleEarlyHours('schedule', scheduleCalendar, event.currentTarget));
+
 document.getElementById('cashBookingButton').addEventListener('click', () => {
   document.getElementById('cashDate').value = dateOnly(new Date());
   document.getElementById('cashTime').value = '14:00';
@@ -190,7 +199,7 @@ document.getElementById('cashForm').addEventListener('submit', async (event) => 
     booking_date: date,
     booking_time: `${document.getElementById('cashTime').value}:00`,
     status: 'confirmed',
-    payment_method: 'cash',
+    payment_method: document.getElementById('cashPaymentMethod').value,
   });
   if (error) return alert(error.code === '23505' ? 'Ese horario ya está ocupado.' : error.message);
   document.getElementById('cashModal').classList.remove('open');
