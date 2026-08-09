@@ -43,6 +43,7 @@
     .panel-tab.tab-turnos.active { color: #a56f86; background: #f8e9ef; border-bottom-color: #d4a7b7; }
     .panel-tab.tab-horarios.active { color: #5c8996; background: #eaf7fa; border-bottom-color: #9bcbd5; }
     .panel-tab.tab-clientes.active { color: #5f9275; background: #edf8f0; border-bottom-color: #a9cfbb; }
+    .panel-tab.tab-facturacion.active { color: #a37b2c; background: #fff7dc; border-bottom-color: #e8ce86; }
     .panel-section { display: none; }
     .panel-section.active { display: block; }
     .calendar-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin: .8rem 0 1rem; color: #555; font-size: .9rem; }
@@ -164,7 +165,7 @@
         <button id="appointmentsTab" class="panel-tab tab-turnos active" type="button">Turnos</button>
         <button id="scheduleTab" class="panel-tab tab-horarios" type="button">Editar horarios disponibles</button>
         <button id="clientsTab" class="panel-tab tab-clientes" type="button">Clientes</button>
-        <button id="billingTab" class="panel-tab tab-horarios" type="button">Facturación</button>
+        <button id="billingTab" class="panel-tab tab-facturacion" type="button">Facturación</button>
       </nav>
       <section id="appointmentsPanel" class="panel-section active">
         <button id="cashBookingButton" class="schedule-save" type="button" style="border:0;border-radius:8px;padding:.75rem 1rem;cursor:pointer;font:inherit;font-weight:600;">+ Agregar turno manual</button>
@@ -194,7 +195,7 @@
       <section id="billingPanel" class="panel-section">
         <h2>Facturación</h2>
         <p>Resumen de turnos cobrados durante el mes seleccionado.</p>
-        <label>Mes <input id="billingMonth" type="month"></label>
+        <label>Mes <select id="billingMonth"></select></label>
         <div class="billing-summary"><div class="billing-card"><small>Total facturado</small><strong id="billingTotal">$0</strong></div><div class="billing-card"><small>Turnos cobrados</small><strong id="billingCount">0</strong></div><div class="billing-card"><small>Ticket promedio</small><strong id="billingAverage">$0</strong></div></div>
         <h3>Por tipo de masaje</h3><table class="billing-table"><thead><tr><th>Servicio</th><th>Turnos</th><th>Total</th></tr></thead><tbody id="billingServices"></tbody></table>
         <h3>Por cliente</h3><table class="billing-table"><thead><tr><th>Cliente</th><th>Turnos</th><th>Total</th></tr></thead><tbody id="billingClients"></tbody></table>

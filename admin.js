@@ -102,6 +102,19 @@ async function loadClients() {
 }
 
 function formatMoney(value) { return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value); }
+function ensureBillingMonths() {
+  const select = document.getElementById('billingMonth');
+  if (select.options.length) return;
+  const now = new Date();
+  for (let offset = -12; offset <= 12; offset++) {
+    const date = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const option = document.createElement('option'); option.value = value;
+    option.textContent = new Intl.DateTimeFormat('es-AR', { month: 'long', year: 'numeric' }).format(date);
+    select.appendChild(option);
+  }
+  select.value = dateOnly(now).slice(0, 7);
+}
 async function loadBilling() {
   const month = document.getElementById('billingMonth').value || dateOnly(new Date()).slice(0, 7);
   document.getElementById('billingMonth').value = month;
@@ -235,6 +248,7 @@ document.getElementById('clientsTab').addEventListener('click', () => {
 document.getElementById('billingTab').addEventListener('click', async () => {
   document.getElementById('billingTab').classList.add('active'); document.getElementById('appointmentsTab').classList.remove('active'); document.getElementById('scheduleTab').classList.remove('active'); document.getElementById('clientsTab').classList.remove('active');
   document.getElementById('billingPanel').classList.add('active'); document.getElementById('appointmentsPanel').classList.remove('active'); document.getElementById('schedulePanel').classList.remove('active'); document.getElementById('clientsPanel').classList.remove('active');
+  ensureBillingMonths();
   try { await loadBilling(); } catch (error) { showMessage(document.getElementById('appointmentsMessage'), error.message, 'error'); }
 });
 document.getElementById('billingMonth').addEventListener('change', () => loadBilling());
