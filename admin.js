@@ -154,12 +154,12 @@ function openScheduleModal({ ruleIndex = null, date, start = '14:00', end = '15:
 
 function closeScheduleModal() { document.getElementById('scheduleModal').classList.remove('open'); editingRuleIndex = null; }
 
-async function loadBusinessDashboard(user, isPlatformOwner = false) {
+async function loadBusinessDashboard(user) {
   if (!businessSlug) return false;
   const { data: business, error: businessError } = await supabaseClient.from('businesses').select('id, name, slug').eq('slug', businessSlug).maybeSingle();
   if (businessError || !business) throw new Error('No se encontró ese negocio');
   const { data: membership, error: membershipError } = await supabaseClient.from('business_members').select('role').eq('business_id', business.id).eq('user_id', user.id).maybeSingle();
-  if (!isPlatformOwner && (membershipError || !membership)) throw new Error('No tenés acceso a este negocio');
+  if (membershipError || !membership) throw new Error('No tenés acceso a este negocio');
 
   currentBusiness = business;
   document.getElementById('businessTitle').textContent = business.name;
@@ -220,7 +220,7 @@ async function refreshSession() {
       if (membershipError || !memberships?.length || !memberships[0].businesses?.slug) throw new Error('Tu usuario todavía no tiene un negocio asignado');
       window.location.replace(`${window.location.pathname}?business=${encodeURIComponent(memberships[0].businesses.slug)}`);
       return;
-    } else await loadBusinessDashboard(data.session.user, profile.role === 'platform_owner');
+    } else await loadBusinessDashboard(data.session.user);
   } catch (error) { await supabaseClient.auth.signOut(); showMessage(document.getElementById('loginMessage'), error.message, 'error'); showView(false); }
 }
 
