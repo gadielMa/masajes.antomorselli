@@ -817,6 +817,11 @@ body {
     color: #bbb;
 }
 
+.footer-bottom a {
+    color: inherit;
+    text-decoration: none;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .nav-menu {
@@ -1276,4 +1281,4 @@ body {
     .payment-info {
         padding: 1.5rem;
     }
-} 
+}
