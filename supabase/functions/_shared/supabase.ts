@@ -65,6 +65,13 @@ type AvailabilityRule = {
   active: boolean;
 };
 
+const ARGENTINA_HOLIDAYS_2026 = new Set([
+  "2026-01-01", "2026-02-16", "2026-02-17", "2026-03-23", "2026-03-24",
+  "2026-04-02", "2026-04-03", "2026-05-01", "2026-05-25", "2026-06-15",
+  "2026-06-20", "2026-07-09", "2026-07-10", "2026-08-17", "2026-10-12",
+  "2026-11-23", "2026-12-07", "2026-12-08", "2026-12-25",
+]);
+
 function weekdayForDate(date: string) {
   return new Date(`${date}T12:00:00-03:00`).getUTCDay();
 }
@@ -141,6 +148,7 @@ export async function slotsForDate(
   date: string,
   businessId?: string,
 ) {
+  if (ARGENTINA_HOLIDAYS_2026.has(date)) return [];
   const { data: rules, error: rulesError } = await supabase
     .from("availability_rules")
     .select("start_date, start_time, end_time, frequency, interval_count, occurrences, until_date, weekdays, active")

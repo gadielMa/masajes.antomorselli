@@ -7,6 +7,16 @@ let currentBusiness = null;
 let scheduleCalendar = null;
 let scheduleRules = [];
 let editingRuleIndex = null;
+const ARGENTINA_HOLIDAYS_2026 = {
+  '2026-01-01': 'Año Nuevo', '2026-02-16': 'Carnaval', '2026-02-17': 'Carnaval',
+  '2026-03-23': 'Feriado turístico', '2026-03-24': 'Día Nacional de la Memoria',
+  '2026-04-02': 'Día del Veterano y de los Caídos en Malvinas', '2026-04-03': 'Viernes Santo',
+  '2026-05-01': 'Día del Trabajo', '2026-05-25': 'Revolución de Mayo', '2026-06-15': 'Paso a la Inmortalidad de Güemes',
+  '2026-06-20': 'Paso a la Inmortalidad de Belgrano', '2026-07-09': 'Día de la Independencia', '2026-07-10': 'Feriado turístico',
+  '2026-08-17': 'Paso a la Inmortalidad de San Martín', '2026-10-12': 'Día del Respeto a la Diversidad Cultural',
+  '2026-11-23': 'Día de la Soberanía Nacional', '2026-12-07': 'Feriado turístico', '2026-12-08': 'Inmaculada Concepción', '2026-12-25': 'Navidad',
+};
+function argentinaHoliday(date) { return ARGENTINA_HOLIDAYS_2026[dateOnly(date)] || null; }
 
 function showMessage(element, message, type) { element.textContent = message; element.className = `admin-message ${type}`; }
 function showView(authenticated) { loginView.style.display = authenticated ? 'none' : 'block'; dashboard.style.display = 'none'; businessDashboard.style.display = 'none'; }
@@ -75,6 +85,13 @@ async function loadBusinessDashboard(user, isPlatformOwner = false) {
     slotMinTime: '06:00:00', slotMaxTime: '23:00:00', slotDuration: '00:30:00', height: 'auto', editable: true, selectable: true,
     headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
     events: (info, success) => success(eventDataForRange(info.start, info.end)),
+    dayCellClassNames: (info) => {
+      const classes = [];
+      if (info.date.getDay() === 0) classes.push('sunday-cell');
+      if (argentinaHoliday(info.date)) classes.push('argentina-holiday');
+      return classes;
+    },
+    selectAllow: (info) => !argentinaHoliday(info.start) && info.start.getDay() !== 0,
     select: (info) => openScheduleModal({ date: dateOnly(info.start), start: info.startStr.slice(11, 16), end: info.endStr.slice(11, 16) }),
     eventClick: (info) => openScheduleModal({ ruleIndex: info.event.extendedProps.ruleIndex, date: dateOnly(info.event.start), start: info.event.start.toTimeString(), end: info.event.end.toTimeString() }),
     eventChange: (info) => {
