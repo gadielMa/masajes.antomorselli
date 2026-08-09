@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administración - Induliru</title>
+  <script>
+    fetch('../admin.html')
+      .then((response) => response.text())
+      .then((html) => {
+        const withBase = html.replace('<head>', '<head><base href="../">');
+        document.open();
+        document.write(withBase);
+        document.close();
+      })
+      .catch(() => {
+        document.body.textContent = 'No se pudo cargar el panel de administración.';
+      });
+  </script>
+</head>
+<body></body>
+</html>
