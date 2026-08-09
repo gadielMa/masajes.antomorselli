@@ -33,7 +33,8 @@
     .fc .fc-button:hover, .fc .fc-button:focus { background: #72a9b8; border-color: #72a9b8; }
     .fc-event { background: #d4a7b7; border-color: #d4a7b7; cursor: move; }
     .fc .argentina-holiday { background: rgba(74, 183, 214, .18) !important; }
-    .fc .sunday-cell { background: rgba(125, 137, 145, .16) !important; }
+    .fc .fc-day-today { background: transparent !important; }
+    .fc .sunday-cell, .fc .fc-day-sun { background: rgba(125, 137, 145, .16) !important; }
     .business-welcome { margin: 0 0 .5rem; padding: 1rem max(1.25rem, calc((100vw - 1100px) / 2)); background: #e7e8ea; }
     .business-welcome h1 { margin: 0; }
     .business-welcome p { margin-bottom: 0; }
@@ -105,6 +106,7 @@
     body.dark-mode .fc .fc-col-header-cell { background: #31434b; }
     body.dark-mode .fc .fc-scrollgrid-section > *, body.dark-mode .fc .fc-scrollgrid-section-header > * { background: #26343b; }
     body.dark-mode .fc .fc-col-header-cell-cushion, body.dark-mode .fc .fc-daygrid-day-number { color: #d6e1e4 !important; }
+    body.dark-mode .fc .sunday-cell, body.dark-mode .fc .fc-day-sun { background: rgba(125, 137, 145, .22) !important; }
     .client-dialog { width: min(460px, 100%); background: #fffdf9; border-radius: 16px; padding: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
     .client-dialog h2 { color: #3f4b56; margin: 0 0 .7rem; }
     .client-dialog p { color: #66737a; }
