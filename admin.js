@@ -4,6 +4,7 @@ const dashboard = document.getElementById('dashboard');
 const businessDashboard = document.getElementById('businessDashboard');
 const businessSlug = new URLSearchParams(window.location.search).get('business');
 let currentBusiness = null;
+let platformOwnerBusinessAccess = false;
 let scheduleCalendar = null;
 let appointmentsCalendar = null;
 let scheduleRules = [];
@@ -101,6 +102,59 @@ async function loadClients() {
   });
 }
 
+async function loadPlatformBusinesses() {
+  const list = document.getElementById('businessListItems');
+  list.replaceChildren();
+  const { data: businesses, error: businessesError } = await supabaseClient
+    .from('businesses')
+    .select('id, name, slug, status')
+    .order('name');
+  if (businessesError) throw businessesError;
+
+  const { data: memberships, error: membershipsError } = await supabaseClient
+    .from('business_members')
+    .select('business_id, user_id')
+    .eq('role', 'owner');
+  if (membershipsError) throw membershipsError;
+
+  const ownerIds = [...new Set((memberships || []).map((membership) => membership.user_id))];
+  const { data: profiles, error: profilesError } = ownerIds.length
+    ? await supabaseClient.from('profiles').select('id, full_name').in('id', ownerIds)
+    : { data: [], error: null };
+  if (profilesError) throw profilesError;
+  const profileById = new Map((profiles || []).map((profile) => [profile.id, profile.full_name]));
+  const ownerByBusiness = new Map((memberships || []).map((membership) => [membership.business_id, profileById.get(membership.user_id)]));
+
+  if (!businesses?.length) {
+    const empty = document.createElement('p');
+    empty.className = 'business-empty';
+    empty.textContent = 'Todavía no hay negocios creados.';
+    list.appendChild(empty);
+    return;
+  }
+
+  businesses.forEach((business) => {
+    const item = document.createElement('article');
+    item.className = 'business-item';
+    const details = document.createElement('div');
+    const title = document.createElement('strong');
+    title.textContent = business.name;
+    const owner = document.createElement('small');
+    owner.textContent = `${ownerByBusiness.get(business.id) || 'Masajista'} · /${business.slug}`;
+    details.append(title, owner);
+    const enter = document.createElement('button');
+    enter.type = 'button';
+    enter.className = 'business-enter';
+    enter.textContent = 'Ingresar';
+    enter.addEventListener('click', () => {
+      sessionStorage.setItem('platformBusinessAccess', business.slug);
+      window.location.assign(`${window.location.pathname}?business=${encodeURIComponent(business.slug)}`);
+    });
+    item.append(details, enter);
+    list.appendChild(item);
+  });
+}
+
 function formatMoney(value) { return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value); }
 function ensureBillingMonths() {
   const select = document.getElementById('billingMonth');
@@ -154,12 +208,12 @@ function openScheduleModal({ ruleIndex = null, date, start = '14:00', end = '15:
 
 function closeScheduleModal() { document.getElementById('scheduleModal').classList.remove('open'); editingRuleIndex = null; }
 
-async function loadBusinessDashboard(user) {
+async function loadBusinessDashboard(user, allowPlatformOwner = platformOwnerBusinessAccess) {
   if (!businessSlug) return false;
   const { data: business, error: businessError } = await supabaseClient.from('businesses').select('id, name, slug').eq('slug', businessSlug).maybeSingle();
   if (businessError || !business) throw new Error('No se encontró ese negocio');
   const { data: membership, error: membershipError } = await supabaseClient.from('business_members').select('role').eq('business_id', business.id).eq('user_id', user.id).maybeSingle();
-  if (membershipError || !membership) throw new Error('No tenés acceso a este negocio');
+  if ((membershipError || !membership) && !allowPlatformOwner) throw new Error('No tenés acceso a este negocio');
 
   currentBusiness = business;
   document.getElementById('businessTitle').textContent = business.name;
@@ -210,7 +264,10 @@ async function refreshSession() {
     const { data: profile, error } = await supabaseClient.from('profiles').select('role').eq('id', data.session.user.id).single();
     if (error) throw error;
     showView(true);
-    if (profile.role === 'platform_owner' && !businessSlug) dashboard.style.display = 'block';
+    if (profile.role === 'platform_owner' && !businessSlug) {
+      dashboard.style.display = 'block';
+      await loadPlatformBusinesses();
+    }
     else if (!businessSlug) {
       const { data: memberships, error: membershipError } = await supabaseClient
         .from('business_members')
@@ -220,7 +277,13 @@ async function refreshSession() {
       if (membershipError || !memberships?.length || !memberships[0].businesses?.slug) throw new Error('Tu usuario todavía no tiene un negocio asignado');
       window.location.replace(`${window.location.pathname}?business=${encodeURIComponent(memberships[0].businesses.slug)}`);
       return;
-    } else await loadBusinessDashboard(data.session.user);
+    } else {
+      const platformBusinessAccess = sessionStorage.getItem('platformBusinessAccess');
+      const allowPlatformOwner = profile.role === 'platform_owner' && platformBusinessAccess === businessSlug;
+      platformOwnerBusinessAccess = allowPlatformOwner;
+      if (allowPlatformOwner) sessionStorage.removeItem('platformBusinessAccess');
+      await loadBusinessDashboard(data.session.user, allowPlatformOwner);
+    }
   } catch (error) { await supabaseClient.auth.signOut(); showMessage(document.getElementById('loginMessage'), error.message, 'error'); showView(false); }
 }
 
@@ -229,7 +292,7 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
   const { error } = await supabaseClient.auth.signInWithPassword({ email: document.getElementById('loginEmail').value.trim(), password: document.getElementById('loginPassword').value });
   button.disabled = false; if (error) return showMessage(document.getElementById('loginMessage'), error.message, 'error'); await refreshSession();
 });
-for (const id of ['logoutBtn', 'businessLogoutBtn']) document.getElementById(id).addEventListener('click', async () => { await supabaseClient.auth.signOut(); showView(false); });
+for (const id of ['logoutBtn', 'businessLogoutBtn']) document.getElementById(id).addEventListener('click', async () => { await supabaseClient.auth.signOut(); platformOwnerBusinessAccess = false; sessionStorage.removeItem('platformBusinessAccess'); showView(false); });
 
 document.getElementById('appointmentsTab').addEventListener('click', () => {
   document.getElementById('appointmentsTab').classList.add('active'); document.getElementById('scheduleTab').classList.remove('active');
@@ -383,7 +446,7 @@ document.getElementById('createForm').addEventListener('submit', async (event) =
   event.preventDefault(); const form = event.target; const button = form.querySelector('button'); const message = document.getElementById('createMessage'); button.disabled = true;
   const { data: sessionData } = await supabaseClient.auth.getSession();
   const response = await fetch(supabaseFunctionUrl('create-business-admin'), { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_CONFIG.ANON_KEY, 'Authorization': `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify({ full_name: document.getElementById('fullName').value.trim(), email: document.getElementById('email').value.trim(), password: document.getElementById('password').value, business_name: document.getElementById('businessName').value.trim(), slug: document.getElementById('slug').value.trim().toLowerCase() }) });
-  const result = await response.json().catch(() => ({})); button.disabled = false; if (!response.ok) return showMessage(message, result.error || 'No se pudo crear la cuenta', 'error'); showMessage(message, `Cuenta creada para ${result.admin.email}. Negocio: ${result.business.slug}`, 'success'); form.reset();
+  const result = await response.json().catch(() => ({})); button.disabled = false; if (!response.ok) return showMessage(message, result.error || 'No se pudo crear la cuenta', 'error'); showMessage(message, `Cuenta creada para ${result.admin.email}. Negocio: ${result.business.slug}`, 'success'); form.reset(); await loadPlatformBusinesses();
 });
 
 function applyDarkMode(enabled) {
