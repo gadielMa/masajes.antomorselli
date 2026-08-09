@@ -8,6 +8,8 @@ let scheduleCalendar = null;
 let appointmentsCalendar = null;
 let scheduleRules = [];
 let editingRuleIndex = null;
+let editingClientId = null;
+let pendingClientDeleteId = null;
 const earlyHoursVisible = { appointments: false, schedule: false };
 const ARGENTINA_HOLIDAYS_2026 = {
   '2026-01-01': 'Año Nuevo', '2026-02-16': 'Carnaval', '2026-02-17': 'Carnaval',
@@ -93,8 +95,8 @@ async function loadClients() {
     const name = document.createElement('td'); name.textContent = client.name;
     const dni = document.createElement('td'); dni.textContent = client.dni;
     const actions = document.createElement('td'); actions.className = 'client-actions';
-    const edit = document.createElement('button'); edit.className = 'client-action client-edit'; edit.dataset.action = 'edit'; edit.dataset.id = client.id; edit.textContent = 'Editar';
-    const remove = document.createElement('button'); remove.className = 'client-action client-delete'; remove.dataset.action = 'delete'; remove.dataset.id = client.id; remove.textContent = 'Eliminar';
+    const edit = document.createElement('button'); edit.className = 'client-action client-edit'; edit.dataset.action = 'edit'; edit.dataset.id = client.id; edit.dataset.name = client.name; edit.dataset.dni = client.dni; edit.textContent = 'Editar';
+    const remove = document.createElement('button'); remove.className = 'client-action client-delete'; remove.dataset.action = 'delete'; remove.dataset.id = client.id; remove.dataset.name = client.name; remove.dataset.dni = client.dni; remove.textContent = 'Eliminar';
     actions.append(edit, remove); row.append(name, dni, actions); list.appendChild(row);
   });
 }
@@ -212,26 +214,60 @@ document.getElementById('clientForm').addEventListener('submit', async (event) =
   await loadClients();
 });
 
+function closeClientConfirm() { document.getElementById('clientConfirmModal').classList.remove('open'); pendingClientDeleteId = null; }
+function showClientNotice(title, text) {
+  document.getElementById('clientConfirmTitle').textContent = title;
+  document.getElementById('clientConfirmText').textContent = text;
+  document.getElementById('clientConfirmAccept').style.display = 'none';
+  document.getElementById('clientConfirmCancel').textContent = 'Entendido';
+  document.getElementById('clientConfirmModal').classList.add('open');
+}
+function showClientDeleteConfirm(id, name) {
+  pendingClientDeleteId = id;
+  document.getElementById('clientConfirmTitle').textContent = 'Eliminar cliente';
+  document.getElementById('clientConfirmText').textContent = `¿Querés eliminar a ${name} de la lista? Sus reservas no se borrarán.`;
+  document.getElementById('clientConfirmAccept').style.display = 'inline-block';
+  document.getElementById('clientConfirmCancel').textContent = 'Cancelar';
+  document.getElementById('clientConfirmModal').classList.add('open');
+}
+
+document.getElementById('clientConfirmCancel').addEventListener('click', closeClientConfirm);
+document.getElementById('clientConfirmAccept').addEventListener('click', async () => {
+  if (!pendingClientDeleteId) return;
+  const { error } = await supabaseClient.from('clients').delete().eq('id', pendingClientDeleteId).eq('business_id', currentBusiness.id);
+  closeClientConfirm();
+  if (error) return showMessage(document.getElementById('clientsMessage'), error.message, 'error');
+  await loadClients();
+});
+
 document.getElementById('clientsList').addEventListener('click', async (event) => {
   const button = event.target.closest('button[data-id]');
   if (!button) return;
   const id = button.dataset.id;
   if (button.dataset.action === 'delete') {
-    if (!confirm('¿Querés eliminar este cliente de la lista? Sus reservas no se borrarán.')) return;
-    const { error } = await supabaseClient.from('clients').delete().eq('id', id).eq('business_id', currentBusiness.id);
+    const { data: bookings, error } = await supabaseClient.from('bookings').select('id').eq('business_id', currentBusiness.id).eq('dni', button.dataset.dni).limit(1);
     if (error) return showMessage(document.getElementById('clientsMessage'), error.message, 'error');
+    if (bookings?.length) return showClientNotice('Cliente con reservas', 'No se puede eliminar este cliente porque tiene turnos asociados. Las reservas deben seguir siendo consultables por DNI.');
+    return showClientDeleteConfirm(id, button.dataset.name);
   } else {
-    const row = button.closest('tr');
-    const currentName = row.children[0].textContent;
-    const currentDni = row.children[1].textContent;
-    const name = prompt('Nombre del cliente:', currentName);
-    if (name === null) return;
-    const dni = prompt('DNI del cliente:', currentDni);
-    if (dni === null || !/^\d{7,8}$/.test(dni.trim())) return alert('El DNI debe tener 7 u 8 dígitos.');
-    const { error } = await supabaseClient.from('clients').update({ name: name.trim(), dni: dni.trim() }).eq('id', id).eq('business_id', currentBusiness.id);
-    if (error) return showMessage(document.getElementById('clientsMessage'), error.message, 'error');
+    editingClientId = id;
+    document.getElementById('editClientName').value = button.dataset.name;
+    document.getElementById('editClientDni').value = button.dataset.dni;
+    const { data: bookings } = await supabaseClient.from('bookings').select('id').eq('business_id', currentBusiness.id).eq('dni', button.dataset.dni).limit(1);
+    const hasBookings = Boolean(bookings?.length);
+    document.getElementById('editClientDni').readOnly = hasBookings;
+    document.getElementById('editClientNotice').style.display = hasBookings ? 'block' : 'none';
+    document.getElementById('editClientNotice').textContent = hasBookings ? 'Este cliente tiene reservas: el DNI no se puede modificar.' : '';
+    document.getElementById('clientEditModal').classList.add('open');
   }
-  await loadClients();
+});
+
+document.getElementById('clientEditCancel').addEventListener('click', () => { document.getElementById('clientEditModal').classList.remove('open'); editingClientId = null; });
+document.getElementById('clientEditForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const { error } = await supabaseClient.from('clients').update({ name: document.getElementById('editClientName').value.trim(), dni: document.getElementById('editClientDni').value.trim() }).eq('id', editingClientId).eq('business_id', currentBusiness.id);
+  if (error) return showMessage(document.getElementById('clientsMessage'), error.message, 'error');
+  document.getElementById('clientEditModal').classList.remove('open'); editingClientId = null; await loadClients();
 });
 
 function toggleEarlyHours(kind, calendar, button) {

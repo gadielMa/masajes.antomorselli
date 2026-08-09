@@ -35,7 +35,9 @@
     .business-welcome h1 { margin: 0; }
     .panel-tabs { display: flex; gap: .5rem; border-bottom: 1px solid #e4e5e8; margin-bottom: 1.2rem; }
     .panel-tab { border: 0; background: transparent; color: #666; padding: .8rem 1rem; cursor: pointer; font: inherit; font-weight: 600; border-bottom: 3px solid transparent; }
-    .panel-tab.active { color: #a56f86; border-bottom-color: #d4a7b7; }
+    .panel-tab.tab-turnos.active { color: #a56f86; background: #f8e9ef; border-bottom-color: #d4a7b7; }
+    .panel-tab.tab-horarios.active { color: #5c8996; background: #eaf7fa; border-bottom-color: #9bcbd5; }
+    .panel-tab.tab-clientes.active { color: #5f9275; background: #edf8f0; border-bottom-color: #a9cfbb; }
     .panel-section { display: none; }
     .panel-section.active { display: block; }
     .calendar-legend { display: flex; gap: 1rem; flex-wrap: wrap; margin: .8rem 0 1rem; color: #555; font-size: .9rem; }
@@ -55,6 +57,19 @@
     .client-action { border: 0; border-radius: 6px; padding: .4rem .6rem; cursor: pointer; font: inherit; font-size: .85rem; }
     .client-edit { background: #f3e9ef; color: #a56f86; }
     .client-delete { background: #fdecec; color: #a52b2b; }
+    .client-dialog { width: min(460px, 100%); background: #fffdf9; border-radius: 16px; padding: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+    .client-dialog h2 { color: #3f4b56; margin: 0 0 .7rem; }
+    .client-dialog p { color: #66737a; }
+    .client-dialog-actions { display: flex; justify-content: flex-end; gap: .5rem; margin-top: 1.2rem; }
+    .client-dialog-actions button { border: 0; border-radius: 8px; padding: .7rem 1rem; cursor: pointer; font: inherit; font-weight: 600; }
+    .client-primary { background: #a9cfbb; color: #365447; }
+    .client-secondary { background: #edf4f5; color: #527985; }
+    .client-danger { background: #f5d5d1; color: #9e5550; }
+    .client-readonly { background: #f6f1e8; color: #81745e; padding: .65rem .8rem; border-radius: 8px; font-size: .9rem; }
+    #appointmentsPanel .fc .fc-button-primary.fc-button-active { background: #c9859c !important; border-color: #c9859c !important; color: #fff !important; }
+    #appointmentsPanel .fc .fc-button { background: #e4b1c0; border-color: #e4b1c0; }
+    #schedulePanel .fc .fc-button-primary.fc-button-active { background: #72a9b8 !important; border-color: #72a9b8 !important; color: #fff !important; }
+    #schedulePanel .fc .fc-button { background: #a9d4dc; border-color: #a9d4dc; color: #426b75; }
     @media (max-width: 700px) { .client-form { grid-template-columns: 1fr; } .clients-table { font-size: .9rem; } }
     .early-hours-toggle { border: 1px solid #c4d8dc; background: transparent; color: #7799a1; border-radius: 8px; padding: .45rem .7rem; cursor: pointer; font: inherit; font-size: .9rem; margin: .7rem 0; }
     .schedule-modal { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; padding: 1rem; background: rgba(35,25,31,.45); }
@@ -99,9 +114,9 @@
     <section id="businessDashboard" class="admin-card">
       <div class="admin-topbar business-welcome"><div><h1>Bienvenido, <span id="businessTitle">Induliru</span></h1><p>Gestioná tus turnos y horarios.</p></div><button id="businessLogoutBtn" class="logout">Cerrar sesión</button></div>
       <nav class="panel-tabs" aria-label="Secciones del negocio">
-        <button id="appointmentsTab" class="panel-tab active" type="button">Turnos</button>
-        <button id="scheduleTab" class="panel-tab" type="button">Editar horarios disponibles</button>
-        <button id="clientsTab" class="panel-tab" type="button">Clientes</button>
+        <button id="appointmentsTab" class="panel-tab tab-turnos active" type="button">Turnos</button>
+        <button id="scheduleTab" class="panel-tab tab-horarios" type="button">Editar horarios disponibles</button>
+        <button id="clientsTab" class="panel-tab tab-clientes" type="button">Clientes</button>
       </nav>
       <section id="appointmentsPanel" class="panel-section active">
         <button id="cashBookingButton" class="schedule-save" type="button" style="border:0;border-radius:8px;padding:.75rem 1rem;cursor:pointer;font:inherit;font-weight:600;">+ Agregar turno manual</button>
@@ -163,6 +178,16 @@
       </div>
       <div class="schedule-actions"><span></span><span><button id="cashCancel" class="schedule-cancel" type="button">Cancelar</button> <button class="schedule-save" type="submit">Guardar turno</button></span></div>
     </form>
+  </div>
+  <div id="clientEditModal" class="schedule-modal" role="dialog" aria-modal="true">
+    <form id="clientEditForm" class="client-dialog">
+      <h2>Editar cliente</h2>
+      <div class="admin-form"><label>Nombre<input id="editClientName" required></label><label>DNI<input id="editClientDni" inputmode="numeric" pattern="[0-9]{7,8}" minlength="7" maxlength="8" required></label><div id="editClientNotice" class="client-readonly" style="display:none"></div></div>
+      <div class="client-dialog-actions"><button id="clientEditCancel" class="client-secondary" type="button">Cancelar</button><button class="client-primary" type="submit">Guardar cambios</button></div>
+    </form>
+  </div>
+  <div id="clientConfirmModal" class="schedule-modal" role="dialog" aria-modal="true">
+    <div class="client-dialog"><h2 id="clientConfirmTitle">Confirmar acción</h2><p id="clientConfirmText"></p><div class="client-dialog-actions"><button id="clientConfirmCancel" class="client-secondary" type="button">Cancelar</button><button id="clientConfirmAccept" class="client-danger" type="button">Eliminar</button></div></div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
