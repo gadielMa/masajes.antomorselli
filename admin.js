@@ -4,6 +4,7 @@ const dashboard = document.getElementById('dashboard');
 const businessDashboard = document.getElementById('businessDashboard');
 const businessSlug = new URLSearchParams(window.location.search).get('business');
 let currentBusiness = null;
+let hoursCalendar = null;
 
 function showMessage(element, message, type) {
   element.textContent = message;
@@ -43,15 +44,46 @@ async function loadBusinessDashboard(user, isPlatformOwner = false) {
   currentBusiness = business;
   document.getElementById('businessTitle').textContent = business.name;
   const byDay = Object.fromEntries((hours || []).map((row) => [row.weekday, row]));
-  const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  document.getElementById('hoursRows').innerHTML = days.map((day, weekday) => {
-    const row = byDay[weekday] || { start_time: '14:00', end_time: '17:00', slot_minutes: 60, active: false };
-    return `<label style="grid-template-columns: 1.2fr 1fr 1fr auto; align-items:center; gap:.5rem; font-weight:500;">
-      <span>${day}</span><input type="time" data-start="${weekday}" value="${row.start_time.slice(0, 5)}">
-      <input type="time" data-end="${weekday}" value="${row.end_time.slice(0, 5)}">
-      <input type="checkbox" data-active="${weekday}" ${row.active ? 'checked' : ''} aria-label="${day} activo">
-    </label>`;
-  }).join('');
+  const monday = new Date();
+  monday.setHours(0, 0, 0, 0);
+  const mondayDay = monday.getDay() || 7;
+  monday.setDate(monday.getDate() - mondayDay + 1);
+  const dateForWeekday = (weekday) => {
+    const date = new Date(monday);
+    date.setDate(monday.getDate() + (weekday === 0 ? 6 : weekday - 1));
+    return date.toISOString().slice(0, 10);
+  };
+  const events = Object.entries(byDay).filter(([, row]) => row.active).map(([weekday, row]) => ({
+    id: `weekday-${weekday}`,
+    title: 'Disponible',
+    start: `${dateForWeekday(Number(weekday))}T${row.start_time.slice(0, 5)}:00`,
+    end: `${dateForWeekday(Number(weekday))}T${row.end_time.slice(0, 5)}:00`,
+  }));
+  if (hoursCalendar) hoursCalendar.destroy();
+  hoursCalendar = new FullCalendar.Calendar(document.getElementById('hoursCalendar'), {
+    initialView: 'timeGridWeek',
+    initialDate: monday,
+    locale: 'es',
+    firstDay: 1,
+    allDaySlot: false,
+    slotMinTime: '06:00:00',
+    slotMaxTime: '23:00:00',
+    slotDuration: '00:30:00',
+    height: 'auto',
+    editable: true,
+    selectable: true,
+    events,
+    dateClick(info) {
+      if (hoursCalendar.getEvents().some((event) => event.start.getDay() === info.date.getDay())) return;
+      const end = new Date(info.date);
+      end.setHours(end.getHours() + 1);
+      hoursCalendar.addEvent({ title: 'Disponible', start: info.date, end, id: `weekday-${info.date.getDay()}` });
+    },
+    eventClick(info) {
+      if (confirm('¿Querés eliminar este horario?')) info.event.remove();
+    },
+  });
+  hoursCalendar.render();
   businessDashboard.style.display = 'block';
   return true;
 }
@@ -104,13 +136,18 @@ document.getElementById('hoursForm').addEventListener('submit', async (event) =>
   const message = document.getElementById('hoursMessage');
   const button = event.target.querySelector('button');
   button.disabled = true;
-  const rows = [...document.querySelectorAll('#hoursRows label')].map((row, weekday) => ({
+  const events = hoursCalendar.getEvents();
+  const activeByDay = Object.fromEntries(events.map((event) => {
+    const weekday = event.start.getDay();
+    return [weekday, { start_time: event.start.toTimeString().slice(0, 8), end_time: event.end.toTimeString().slice(0, 8) }];
+  }));
+  const rows = Array.from({ length: 7 }, (_, weekday) => ({
     business_id: currentBusiness.id,
     weekday,
-    start_time: row.querySelector('[data-start]').value,
-    end_time: row.querySelector('[data-end]').value,
+    start_time: activeByDay[weekday]?.start_time || '14:00:00',
+    end_time: activeByDay[weekday]?.end_time || '17:00:00',
     slot_minutes: 60,
-    active: row.querySelector('[data-active]').checked,
+    active: Boolean(activeByDay[weekday]),
   }));
   const { error } = await supabaseClient.from('business_hours').upsert(rows, { onConflict: 'business_id,weekday' });
   button.disabled = false;

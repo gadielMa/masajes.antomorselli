@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Administración - Masajes</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css">
   <style>
     .admin-page { min-height: 100vh; padding: 7rem 1.5rem 3rem; background: #f8f9fa; }
     .admin-card { max-width: 680px; margin: 0 auto; background: #fff; padding: 2rem; border-radius: 18px; box-shadow: 0 10px 35px rgba(0,0,0,.08); }
@@ -21,6 +22,12 @@
     #dashboard, #businessDashboard, #loginView { display: none; }
     .admin-topbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
     .logout { border: 1px solid #8B4B6B; background: #fff; color: #8B4B6B; padding: .6rem 1rem; border-radius: 8px; cursor: pointer; }
+    #hoursCalendar { margin: 1rem 0 1.5rem; }
+    .calendar-help { background: #f8f0f4; color: #684054; padding: .8rem 1rem; border-radius: 9px; font-size: .92rem; }
+    .fc .fc-toolbar-title { font-size: 1.1rem; }
+    .fc .fc-button { background: #8B4B6B; border-color: #8B4B6B; }
+    .fc .fc-button:hover, .fc .fc-button:focus { background: #713b56; border-color: #713b56; }
+    .fc-event { background: #8B4B6B; border-color: #8B4B6B; cursor: move; }
   </style>
 </head>
 <body>
@@ -51,14 +58,16 @@
 
     <section id="businessDashboard" class="admin-card">
       <div class="admin-topbar"><div><h1 id="businessTitle">Mi negocio</h1><p>Configurá los días y horarios disponibles.</p></div><button id="businessLogoutBtn" class="logout">Cerrar sesión</button></div>
+      <div class="calendar-help">Hacé clic en un día para crear un turno de una hora. Arrastrá el bloque o sus bordes para cambiarlo. Hacé clic sobre un bloque para eliminarlo.</div>
+      <div id="hoursCalendar"></div>
       <form id="hoursForm" class="admin-form">
-        <div id="hoursRows"></div>
         <button type="submit">Guardar horarios</button>
       </form>
       <div id="hoursMessage" class="admin-message"></div>
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
   <script src="supabase-config.js"></script>
   <script src="admin.js"></script>
 </body>
