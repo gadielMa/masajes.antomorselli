@@ -9,6 +9,7 @@
   <style>
     .admin-page { min-height: 100vh; padding: 7rem 1.5rem 3rem; background: #f8f9fa; }
     .admin-card { max-width: 680px; margin: 0 auto; background: #fff; padding: 2rem; border-radius: 18px; box-shadow: 0 10px 35px rgba(0,0,0,.08); }
+    #businessDashboard { max-width: 1100px; }
     .admin-card h1 { color: #2c3e50; margin-bottom: .5rem; }
     .admin-card p { color: #666; margin-bottom: 1.5rem; }
     .admin-form { display: grid; gap: 1rem; }
@@ -28,6 +29,16 @@
     .fc .fc-button { background: #8B4B6B; border-color: #8B4B6B; }
     .fc .fc-button:hover, .fc .fc-button:focus { background: #713b56; border-color: #713b56; }
     .fc-event { background: #8B4B6B; border-color: #8B4B6B; cursor: move; }
+    .schedule-modal { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; padding: 1rem; background: rgba(35,25,31,.45); }
+    .schedule-modal.open { display: flex; }
+    .schedule-dialog { width: min(460px, 100%); background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+    .schedule-dialog h2 { margin: 0 0 1rem; color: #2c3e50; }
+    .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+    .schedule-actions { display: flex; justify-content: space-between; gap: .7rem; margin-top: 1.2rem; }
+    .schedule-actions button { border: 0; border-radius: 8px; padding: .75rem 1rem; cursor: pointer; font-weight: 600; }
+    .schedule-save { background: #8B4B6B; color: #fff; }
+    .schedule-cancel { background: #eee; color: #333; }
+    .schedule-delete { background: #fdecec; color: #a52b2b; }
   </style>
 </head>
 <body>
@@ -66,9 +77,30 @@
       <div id="hoursMessage" class="admin-message"></div>
     </section>
   </main>
+  <div id="scheduleModal" class="schedule-modal" role="dialog" aria-modal="true">
+    <form id="scheduleForm" class="schedule-dialog">
+      <h2 id="scheduleModalTitle">Nuevo horario</h2>
+      <div class="admin-form">
+        <label>Fecha inicial<input id="scheduleDate" type="date" required></label>
+        <div class="schedule-grid">
+          <label>Desde<input id="scheduleStart" type="time" required></label>
+          <label>Hasta<input id="scheduleEnd" type="time" required></label>
+        </div>
+        <label>Repetir
+          <select id="scheduleFrequency"><option value="once">Una sola vez</option><option value="weekly">Semanalmente</option><option value="monthly">Mensualmente</option></select>
+        </label>
+        <div class="schedule-grid">
+          <label>Cada<input id="scheduleInterval" type="number" min="1" value="1"></label>
+          <label>Repeticiones (opcional)<input id="scheduleOccurrences" type="number" min="1" placeholder="Sin límite"></label>
+        </div>
+        <label>Repetir hasta (opcional)<input id="scheduleUntil" type="date"></label>
+      </div>
+      <div class="schedule-actions"><button id="scheduleDelete" class="schedule-delete" type="button">Eliminar</button><span><button id="scheduleCancel" class="schedule-cancel" type="button">Cancelar</button> <button class="schedule-save" type="submit">Guardar</button></span></div>
+    </form>
+  </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
   <script src="supabase-config.js"></script>
-  <script src="admin.js?v=374c9a8"></script>
+  <script src="admin.js?v=rules-1"></script>
 </body>
 </html>

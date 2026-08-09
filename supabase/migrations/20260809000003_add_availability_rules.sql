@@ -34,7 +34,7 @@ insert into public.availability_rules
 select
   business_id,
   'Disponible',
-  current_date - extract(dow from current_date)::int,
+  current_date - (extract(isodow from current_date)::int - 1),
   start_time,
   end_time,
   'weekly',
