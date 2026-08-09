@@ -11,6 +11,7 @@ let scheduleRules = [];
 let editingRuleIndex = null;
 let editingClientId = null;
 let pendingClientDeleteId = null;
+let emailClientId = null;
 const earlyHoursVisible = { appointments: false, schedule: false };
 const ARGENTINA_HOLIDAYS_2026 = {
   '2026-01-01': 'Año Nuevo', '2026-02-16': 'Carnaval', '2026-02-17': 'Carnaval',
@@ -97,7 +98,7 @@ async function loadClients() {
     const dni = document.createElement('td'); dni.textContent = client.dni;
     const contact = document.createElement('td'); contact.className = 'client-contact';
     if (client.email) {
-      const email = document.createElement('a'); email.className = 'client-email-link'; email.href = `mailto:${client.email}`; email.title = `Enviar email a ${client.email}`; email.innerHTML = '<i class="fas fa-envelope"></i>'; contact.appendChild(email);
+      const email = document.createElement('button'); email.type = 'button'; email.className = 'client-email-button'; email.dataset.action = 'email'; email.dataset.id = client.id; email.dataset.name = client.name; email.dataset.email = client.email; email.title = `Enviar email a ${client.email}`; email.innerHTML = '<i class="fas fa-envelope"></i>'; contact.appendChild(email);
     }
     if (client.whatsapp) {
       const whatsapp = document.createElement('a'); whatsapp.className = 'client-whatsapp-link'; whatsapp.href = `https://wa.me/${String(client.whatsapp).replace(/\D/g, '')}`; whatsapp.target = '_blank'; whatsapp.rel = 'noopener'; whatsapp.title = `Abrir WhatsApp de ${client.whatsapp}`; whatsapp.innerHTML = '<i class="fab fa-whatsapp"></i>'; contact.appendChild(whatsapp);
@@ -404,6 +405,16 @@ document.getElementById('clientsList').addEventListener('click', async (event) =
   const button = event.target.closest('button[data-id]');
   if (!button) return;
   const id = button.dataset.id;
+  if (button.dataset.action === 'email') {
+    emailClientId = id;
+    document.getElementById('clientEmailRecipient').textContent = `Para: ${button.dataset.name} · ${button.dataset.email}`;
+    document.getElementById('clientEmailSubject').value = 'Mensaje de Induliru';
+    document.getElementById('clientEmailMessage').value = '';
+    document.getElementById('clientEmailStatus').className = 'admin-message';
+    document.getElementById('clientEmailStatus').textContent = '';
+    document.getElementById('clientEmailModal').classList.add('open');
+    return;
+  }
   if (button.dataset.action === 'delete') {
     const { data: bookings, error } = await supabaseClient.from('bookings').select('id').eq('business_id', currentBusiness.id).eq('dni', button.dataset.dni).limit(1);
     if (error) return showMessage(document.getElementById('clientsMessage'), error.message, 'error');
@@ -430,6 +441,26 @@ document.getElementById('clientEditForm').addEventListener('submit', async (even
   const { error } = await supabaseClient.from('clients').update({ name: document.getElementById('editClientName').value.trim(), dni: document.getElementById('editClientDni').value.trim(), email: document.getElementById('editClientEmail').value.trim().toLowerCase() || null, whatsapp: document.getElementById('editClientWhatsapp').value.trim() || null }).eq('id', editingClientId).eq('business_id', currentBusiness.id);
   if (error) return showMessage(document.getElementById('clientsMessage'), error.message, 'error');
   document.getElementById('clientEditModal').classList.remove('open'); editingClientId = null; await loadClients();
+});
+
+function closeClientEmailModal() { document.getElementById('clientEmailModal').classList.remove('open'); emailClientId = null; }
+document.getElementById('clientEmailCancel').addEventListener('click', closeClientEmailModal);
+document.getElementById('clientEmailForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const button = event.target.querySelector('button[type="submit"]');
+  const status = document.getElementById('clientEmailStatus');
+  button.disabled = true;
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const response = await fetch(supabaseFunctionUrl('send-client-email'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', apikey: SUPABASE_CONFIG.ANON_KEY, Authorization: `Bearer ${sessionData.session?.access_token || ''}` },
+    body: JSON.stringify({ business_id: currentBusiness.id, client_id: emailClientId, subject: document.getElementById('clientEmailSubject').value.trim(), message: document.getElementById('clientEmailMessage').value.trim() }),
+  });
+  const result = await response.json().catch(() => ({}));
+  button.disabled = false;
+  if (!response.ok) return showMessage(status, result.error || 'No se pudo enviar el email.', 'error');
+  showMessage(status, `Email enviado. Quedan ${result.remaining} envíos este mes.`, 'success');
+  setTimeout(closeClientEmailModal, 1400);
 });
 
 function toggleEarlyHours(kind, calendar, button) {

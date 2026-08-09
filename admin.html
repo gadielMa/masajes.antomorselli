@@ -16,7 +16,7 @@
     .admin-card p { color: #666; margin-bottom: 1.5rem; }
     .admin-form { display: grid; gap: 1rem; }
     .admin-form label { display: grid; gap: .35rem; color: #53616b; font-weight: 600; }
-    .admin-form input { padding: .85rem 1rem; border: 1px solid #d8dce2; border-radius: 9px; font: inherit; }
+    .admin-form input, .admin-form textarea { padding: .85rem 1rem; border: 1px solid #d8dce2; border-radius: 9px; font: inherit; }
     .admin-form button { border: 0; cursor: pointer; padding: .95rem 1.2rem; border-radius: 9px; background: #a9cfbb; color: #365447; font: inherit; font-weight: 600; }
     .admin-form button:disabled { opacity: .6; cursor: wait; }
     .admin-message { margin-top: 1rem; padding: .85rem 1rem; border-radius: 9px; display: none; }
@@ -81,8 +81,10 @@
     .client-actions { display: flex; gap: .4rem; }
     .client-contact { display: flex; gap: .45rem; flex-wrap: wrap; }
     .client-contact a { text-decoration: none; font-size: .85rem; }
+    .client-contact button { border: 0; background: transparent; padding: 0; cursor: pointer; font-size: .85rem; }
     .client-email-link { color: #d85d59; }
     .client-whatsapp-link { color: #1f9d55; }
+    .client-email-button { color: #d85d59; }
     .client-action { border: 0; border-radius: 6px; padding: .4rem .6rem; cursor: pointer; font: inherit; font-size: .85rem; }
     .client-edit { background: #d0e9d7; color: #4f805f; }
     .client-delete { background: #b8d8c1; color: #365447; }
@@ -113,7 +115,7 @@
     body.dark-mode .business-item small, body.dark-mode .business-empty { color: #c2d0d4; }
     body.dark-mode .platform-panel h2, body.dark-mode .platform-panel p { color: #e8eef0; }
     body.dark-mode .admin-card p, body.dark-mode .admin-form label, body.dark-mode .client-form label { color: #c2d0d4; }
-    body.dark-mode .admin-form input, body.dark-mode .client-form input, body.dark-mode select { background: #1f2b31; color: #f0f5f6; border-color: #526873; }
+    body.dark-mode .admin-form input, body.dark-mode .admin-form textarea, body.dark-mode .client-form input, body.dark-mode select { background: #1f2b31; color: #f0f5f6; border-color: #526873; }
     body.dark-mode .panel-tabs { border-color: #526873; }
     body.dark-mode .panel-tab { color: #b7c7cb; }
     body.dark-mode .panel-tab.tab-turnos.active { background: #4c3944; }
@@ -294,6 +296,15 @@
   </div>
   <div id="clientConfirmModal" class="schedule-modal" role="dialog" aria-modal="true">
     <div class="client-dialog"><h2 id="clientConfirmTitle">Confirmar acción</h2><p id="clientConfirmText"></p><div class="client-dialog-actions"><button id="clientConfirmCancel" class="client-secondary" type="button">Cancelar</button><button id="clientConfirmAccept" class="client-danger" type="button">Eliminar</button></div></div>
+  </div>
+  <div id="clientEmailModal" class="schedule-modal" role="dialog" aria-modal="true">
+    <form id="clientEmailForm" class="client-dialog">
+      <h2>Enviar email</h2>
+      <p id="clientEmailRecipient"></p>
+      <div class="admin-form"><label>Asunto<input id="clientEmailSubject" required value="Mensaje de Induliru"></label><label>Mensaje<textarea id="clientEmailMessage" rows="7" required></textarea></label></div>
+      <div id="clientEmailStatus" class="admin-message"></div>
+      <div class="client-dialog-actions"><button id="clientEmailCancel" class="client-secondary" type="button">Cancelar</button><button class="client-primary" type="submit">Enviar email</button></div>
+    </form>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
