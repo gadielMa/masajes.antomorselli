@@ -18,7 +18,7 @@
     .admin-message { margin-top: 1rem; padding: .85rem 1rem; border-radius: 9px; display: none; }
     .admin-message.success { display: block; background: #e8f6ed; color: #176b35; }
     .admin-message.error { display: block; background: #fdecec; color: #a52b2b; }
-    #dashboard, #loginView { display: none; }
+    #dashboard, #businessDashboard, #loginView { display: none; }
     .admin-topbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
     .logout { border: 1px solid #8B4B6B; background: #fff; color: #8B4B6B; padding: .6rem 1rem; border-radius: 8px; cursor: pointer; }
   </style>
@@ -27,7 +27,7 @@
   <main class="admin-page">
     <section id="loginView" class="admin-card">
       <h1>Panel de administración</h1>
-      <p>Ingresá con tu cuenta de plataforma.</p>
+      <p>Ingresá con tu cuenta de administración.</p>
       <form id="loginForm" class="admin-form">
         <label>Email<input id="loginEmail" type="email" required autocomplete="email"></label>
         <label>Contraseña<input id="loginPassword" type="password" required autocomplete="current-password"></label>
@@ -47,6 +47,15 @@
         <button type="submit">Crear masajista</button>
       </form>
       <div id="createMessage" class="admin-message"></div>
+    </section>
+
+    <section id="businessDashboard" class="admin-card">
+      <div class="admin-topbar"><div><h1 id="businessTitle">Mi negocio</h1><p>Configurá los días y horarios disponibles.</p></div><button id="businessLogoutBtn" class="logout">Cerrar sesión</button></div>
+      <form id="hoursForm" class="admin-form">
+        <div id="hoursRows"></div>
+        <button type="submit">Guardar horarios</button>
+      </form>
+      <div id="hoursMessage" class="admin-message"></div>
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
