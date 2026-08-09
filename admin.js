@@ -266,7 +266,16 @@ async function refreshSession() {
     showView(true);
     if (profile.role === 'platform_owner' && !businessSlug) {
       dashboard.style.display = 'block';
-      await loadPlatformBusinesses();
+      try {
+        await loadPlatformBusinesses();
+      } catch (error) {
+        const list = document.getElementById('businessListItems');
+        list.replaceChildren();
+        const failure = document.createElement('p');
+        failure.className = 'business-empty';
+        failure.textContent = `No se pudieron cargar los negocios: ${error.message}`;
+        list.appendChild(failure);
+      }
     }
     else if (!businessSlug) {
       const { data: memberships, error: membershipError } = await supabaseClient
@@ -293,6 +302,23 @@ document.getElementById('loginForm').addEventListener('submit', async (event) =>
   button.disabled = false; if (error) return showMessage(document.getElementById('loginMessage'), error.message, 'error'); await refreshSession();
 });
 for (const id of ['logoutBtn', 'businessLogoutBtn']) document.getElementById(id).addEventListener('click', async () => { await supabaseClient.auth.signOut(); platformOwnerBusinessAccess = false; sessionStorage.removeItem('platformBusinessAccess'); showView(false); });
+
+function showPlatformPanel(panelId, tabId) {
+  document.querySelectorAll('.platform-panel').forEach((panel) => panel.classList.toggle('active', panel.id === panelId));
+  document.querySelectorAll('#dashboard .panel-tab').forEach((tab) => tab.classList.toggle('active', tab.id === tabId));
+  if (panelId === 'reviewBusinessesPanel') {
+    loadPlatformBusinesses().catch((error) => {
+      const list = document.getElementById('businessListItems');
+      list.replaceChildren();
+      const failure = document.createElement('p');
+      failure.className = 'business-empty';
+      failure.textContent = `No se pudieron cargar los negocios: ${error.message}`;
+      list.appendChild(failure);
+    });
+  }
+}
+document.getElementById('createBusinessTab').addEventListener('click', () => showPlatformPanel('createBusinessPanel', 'createBusinessTab'));
+document.getElementById('reviewBusinessesTab').addEventListener('click', () => showPlatformPanel('reviewBusinessesPanel', 'reviewBusinessesTab'));
 
 document.getElementById('appointmentsTab').addEventListener('click', () => {
   document.getElementById('appointmentsTab').classList.add('active'); document.getElementById('scheduleTab').classList.remove('active');
@@ -446,7 +472,7 @@ document.getElementById('createForm').addEventListener('submit', async (event) =
   event.preventDefault(); const form = event.target; const button = form.querySelector('button'); const message = document.getElementById('createMessage'); button.disabled = true;
   const { data: sessionData } = await supabaseClient.auth.getSession();
   const response = await fetch(supabaseFunctionUrl('create-business-admin'), { method: 'POST', headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_CONFIG.ANON_KEY, 'Authorization': `Bearer ${sessionData.session?.access_token || ''}` }, body: JSON.stringify({ full_name: document.getElementById('fullName').value.trim(), email: document.getElementById('email').value.trim(), password: document.getElementById('password').value, business_name: document.getElementById('businessName').value.trim(), slug: document.getElementById('slug').value.trim().toLowerCase() }) });
-  const result = await response.json().catch(() => ({})); button.disabled = false; if (!response.ok) return showMessage(message, result.error || 'No se pudo crear la cuenta', 'error'); showMessage(message, `Cuenta creada para ${result.admin.email}. Negocio: ${result.business.slug}`, 'success'); form.reset(); await loadPlatformBusinesses();
+  const result = await response.json().catch(() => ({})); button.disabled = false; if (!response.ok) return showMessage(message, result.error || 'No se pudo crear la cuenta', 'error'); showMessage(message, `Cuenta creada para ${result.admin.email}. Negocio: ${result.business.slug}`, 'success'); form.reset(); await loadPlatformBusinesses().catch(() => {});
 });
 
 function applyDarkMode(enabled) {
