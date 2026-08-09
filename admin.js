@@ -84,7 +84,7 @@ async function loadAppointmentsCalendar() {
 }
 
 async function loadClients() {
-  const { data, error } = await supabaseClient.from('clients').select('name, dni').eq('business_id', currentBusiness.id).order('name');
+  const { data, error } = await supabaseClient.from('clients').select('id, name, dni').eq('business_id', currentBusiness.id).order('name');
   if (error) throw error;
   const list = document.getElementById('clientsList');
   list.replaceChildren();
@@ -92,7 +92,10 @@ async function loadClients() {
     const row = document.createElement('tr');
     const name = document.createElement('td'); name.textContent = client.name;
     const dni = document.createElement('td'); dni.textContent = client.dni;
-    row.append(name, dni); list.appendChild(row);
+    const actions = document.createElement('td'); actions.className = 'client-actions';
+    const edit = document.createElement('button'); edit.className = 'client-action client-edit'; edit.dataset.action = 'edit'; edit.dataset.id = client.id; edit.textContent = 'Editar';
+    const remove = document.createElement('button'); remove.className = 'client-action client-delete'; remove.dataset.action = 'delete'; remove.dataset.id = client.id; remove.textContent = 'Eliminar';
+    actions.append(edit, remove); row.append(name, dni, actions); list.appendChild(row);
   });
 }
 
@@ -206,6 +209,28 @@ document.getElementById('clientForm').addEventListener('submit', async (event) =
   if (error) return showMessage(message, error.message, 'error');
   showMessage(message, 'Cliente guardado correctamente.', 'success');
   event.target.reset();
+  await loadClients();
+});
+
+document.getElementById('clientsList').addEventListener('click', async (event) => {
+  const button = event.target.closest('button[data-id]');
+  if (!button) return;
+  const id = button.dataset.id;
+  if (button.dataset.action === 'delete') {
+    if (!confirm('¿Querés eliminar este cliente de la lista? Sus reservas no se borrarán.')) return;
+    const { error } = await supabaseClient.from('clients').delete().eq('id', id).eq('business_id', currentBusiness.id);
+    if (error) return showMessage(document.getElementById('clientsMessage'), error.message, 'error');
+  } else {
+    const row = button.closest('tr');
+    const currentName = row.children[0].textContent;
+    const currentDni = row.children[1].textContent;
+    const name = prompt('Nombre del cliente:', currentName);
+    if (name === null) return;
+    const dni = prompt('DNI del cliente:', currentDni);
+    if (dni === null || !/^\d{7,8}$/.test(dni.trim())) return alert('El DNI debe tener 7 u 8 dígitos.');
+    const { error } = await supabaseClient.from('clients').update({ name: name.trim(), dni: dni.trim() }).eq('id', id).eq('business_id', currentBusiness.id);
+    if (error) return showMessage(document.getElementById('clientsMessage'), error.message, 'error');
+  }
   await loadClients();
 });
 

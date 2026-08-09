@@ -49,6 +49,12 @@
     .clients-table th { color: #684054; }
     .client-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: .7rem; align-items: end; margin-top: 1rem; }
     .client-form button { border: 0; border-radius: 8px; padding: .85rem 1rem; background: #8B4B6B; color: white; cursor: pointer; font: inherit; font-weight: 600; }
+    .client-form label { display: grid; gap: .35rem; color: #2c3e50; font-weight: 600; }
+    .client-form input { padding: .85rem 1rem; border: 1px solid #d8dce2; border-radius: 9px; font: inherit; min-width: 0; }
+    .client-actions { display: flex; gap: .4rem; }
+    .client-action { border: 0; border-radius: 6px; padding: .4rem .6rem; cursor: pointer; font: inherit; font-size: .85rem; }
+    .client-edit { background: #f3e9ef; color: #8B4B6B; }
+    .client-delete { background: #fdecec; color: #a52b2b; }
     @media (max-width: 700px) { .client-form { grid-template-columns: 1fr; } .clients-table { font-size: .9rem; } }
     .early-hours-toggle { border: 1px solid #8B4B6B; background: #fff; color: #8B4B6B; border-radius: 8px; padding: .55rem .8rem; cursor: pointer; font: inherit; font-weight: 600; margin: .7rem 0; }
     .schedule-modal { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; padding: 1rem; background: rgba(35,25,31,.45); }
@@ -120,7 +126,7 @@
           <button type="submit">Agregar cliente</button>
         </form>
         <div id="clientsMessage" class="admin-message"></div>
-        <table class="clients-table"><thead><tr><th>Nombre</th><th>DNI</th></tr></thead><tbody id="clientsList"></tbody></table>
+        <table class="clients-table"><thead><tr><th>Nombre</th><th>DNI</th><th>Acciones</th></tr></thead><tbody id="clientsList"></tbody></table>
       </section>
     </section>
   </main>
