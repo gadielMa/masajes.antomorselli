@@ -822,6 +822,10 @@ body {
     text-decoration: none;
 }
 
+.footer-bottom .fa-whatsapp { color: #25D366; }
+.footer-bottom .fa-instagram { color: #E4405F; }
+.footer-bottom .fa-envelope { color: #EA4335; }
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .nav-menu {
