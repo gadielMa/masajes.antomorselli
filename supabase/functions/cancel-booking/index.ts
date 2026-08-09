@@ -1,5 +1,5 @@
 import { handleOptions, json } from "../_shared/cors.ts";
-import { adminClient } from "../_shared/supabase.ts";
+import { adminClient, businessForSlug } from "../_shared/supabase.ts";
 
 Deno.serve(async (req) => {
   const options = handleOptions(req);
@@ -7,13 +7,15 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
 
   try {
-    const { id, dni } = await req.json();
+    const { id, dni, business_slug } = await req.json();
     if (!id || !/^\d{7,8}$/.test(String(dni))) return json({ error: "Datos inválidos" }, 400);
 
     const supabase = adminClient();
+    const business = await businessForSlug(supabase, business_slug);
     const { data, error } = await supabase.from("bookings")
       .update({ status: "cancelled" })
       .eq("id", id)
+      .eq("business_id", business.id)
       .eq("dni", String(dni))
       .in("status", ["pending", "confirmed"])
       .select("id, status")

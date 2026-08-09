@@ -73,6 +73,26 @@ WHATSAPP_PHONE=5491112345678
 - ✅ Usa variables de entorno de Vercel
 - ✅ Todos los datos sensibles están protegidos
 
+## 👥 Usuarios y roles
+
+La aplicación usa dos tipos de acceso:
+
+- **Administradoras / masajistas:** usuarios de Supabase Auth con `profiles.role = 'admin'`. Pueden gestionar los horarios del negocio desde un futuro panel privado.
+- **Clientes:** pueden reservar, consultar y cancelar como invitados. No necesitan crear una cuenta.
+
+La migración `20260809000000_add_profiles_and_business_hours.sql` crea los perfiles, roles, permisos RLS y horarios editables por día. Los horarios iniciales son lunes a viernes de 14:00 a 17:00, con turnos de 60 minutos.
+
+La migración `20260809000001_add_multi_business_model.sql` agrega el modelo comercial multi-negocio. Cada cuenta tiene un `business` propio y el frontend selecciona el negocio mediante `SUPABASE_CONFIG.BUSINESS_SLUG`. El negocio inicial es `antonella-morselli`.
+
+Para habilitar una administradora:
+
+1. Crear el usuario desde Supabase Dashboard > Authentication > Users.
+2. Ejecutar en el SQL Editor: `update public.profiles set role = 'admin' where id = 'UUID_DEL_USUARIO';`
+
+Supabase es la fuente oficial de reservas y disponibilidad. Google Calendar será una proyección visual sincronizada por backend después de la confirmación del pago.
+
+Para dar de alta una nueva masajista desde el futuro panel, la plataforma deberá crear el usuario de Auth, crear su negocio, asociarlo en `business_members` y asignarle el rol `admin`. Los clientes seguirán reservando sin autenticarse.
+
 ## 📞 Funcionalidades
 
 - ✅ Reserva de turnos online

@@ -31,17 +31,78 @@ export function adminClient() {
   });
 }
 
-export const WORKING_DAYS = [1, 2, 3, 4, 5];
-export const WORKING_HOURS = { start: 14, end: 17 };
+export async function businessForSlug(
+  supabase: ReturnType<typeof adminClient>,
+  slug = "antonella-morselli",
+) {
+  const { data, error } = await supabase
+    .from("businesses")
+    .select("id, name, slug, status")
+    .eq("slug", slug)
+    .eq("status", "active")
+    .single();
 
-export function isValidSlot(date: string, time: string) {
-  const value = new Date(`${date}T${time}:00-03:00`);
-  const day = value.getUTCDay();
-  const hour = Number(time.slice(0, 2));
-  return WORKING_DAYS.includes(day) && hour >= WORKING_HOURS.start && hour < WORKING_HOURS.end;
+  if (error || !data) throw new Error("Negocio no encontrado");
+  return data;
 }
 
-export function slotsForDate(date: string) {
-  const day = new Date(`${date}T12:00:00-03:00`).getUTCDay();
-  return WORKING_DAYS.includes(day) ? ["14:00", "15:00", "16:00"] : [];
+type BusinessHours = {
+  start_time: string;
+  end_time: string;
+  slot_minutes: number;
+  active: boolean;
+};
+
+function weekdayForDate(date: string) {
+  return new Date(`${date}T12:00:00-03:00`).getUTCDay();
+}
+
+function timeToMinutes(value: string) {
+  const [hours, minutes] = value.slice(0, 5).split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
+async function hoursForDate(
+  supabase: ReturnType<typeof adminClient>,
+  date: string,
+  businessId?: string,
+) {
+  let query = supabase
+    .from("business_hours")
+    .select("start_time, end_time, slot_minutes, active")
+    .eq("weekday", weekdayForDate(date));
+
+  if (businessId) query = query.eq("business_id", businessId);
+  const { data, error } = await query.maybeSingle();
+
+  if (error) throw error;
+  return data as BusinessHours | null;
+}
+
+export async function slotsForDate(
+  supabase: ReturnType<typeof adminClient>,
+  date: string,
+  businessId?: string,
+) {
+  const hours = await hoursForDate(supabase, date, businessId);
+  if (!hours || !hours.active) return [];
+
+  const start = timeToMinutes(hours.start_time);
+  const end = timeToMinutes(hours.end_time);
+  const slots: string[] = [];
+
+  for (let minute = start; minute + hours.slot_minutes <= end; minute += hours.slot_minutes) {
+    slots.push(`${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`);
+  }
+  return slots;
+}
+
+export async function isValidSlot(
+  supabase: ReturnType<typeof adminClient>,
+  date: string,
+  time: string,
+  businessId?: string,
+) {
+  const slots = await slotsForDate(supabase, date, businessId);
+  return slots.includes(time.slice(0, 5));
 }

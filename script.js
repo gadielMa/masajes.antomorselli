@@ -276,7 +276,10 @@ async function processMercadoPago() {
 
         const preferenceResult = await callSupabaseFunction('create-preference', {
             method: 'POST',
-            body: JSON.stringify(bookingData)
+            body: JSON.stringify({
+                ...bookingData,
+                business_slug: SUPABASE_CONFIG.BUSINESS_SLUG
+            })
         });
 
         if (!preferenceResult.init_point) {
@@ -960,6 +963,7 @@ async function createRealCalendarEvent(bookingData) {
                 service: bookingData.service,
                 date: bookingData.date,
                 time: bookingData.time,
+                business_slug: SUPABASE_CONFIG.BUSINESS_SLUG,
                 payment_id: bookingData.payment_id || null
             })
         });
@@ -1019,7 +1023,7 @@ async function getRealAvailableSlots(date) {
     console.log('📅 Obteniendo horarios disponibles para:', date);
 
     if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
-        const result = await callSupabaseFunction(`availability?date=${encodeURIComponent(date)}`);
+        const result = await callSupabaseFunction(`availability?date=${encodeURIComponent(date)}&business=${encodeURIComponent(SUPABASE_CONFIG.BUSINESS_SLUG)}`);
         return result.available || [];
     }
     
@@ -1270,7 +1274,7 @@ async function searchAppointmentByDni() {
 async function searchAppointmentInBackend(dni) {
     if (typeof isSupabaseConfigured === 'function' && isSupabaseConfigured()) {
         try {
-            const result = await callSupabaseFunction(`appointment?dni=${encodeURIComponent(dni)}`);
+            const result = await callSupabaseFunction(`appointment?dni=${encodeURIComponent(dni)}&business=${encodeURIComponent(SUPABASE_CONFIG.BUSINESS_SLUG)}`);
             return result.appointment || null;
         } catch (error) {
             console.error('❌ Error buscando turno en Supabase:', error);
@@ -1550,7 +1554,7 @@ async function cancelAppointmentInBackend(appointmentId, dni) {
         try {
             const result = await callSupabaseFunction('cancel-booking', {
                 method: 'POST',
-                body: JSON.stringify({ id: appointmentId, dni })
+                body: JSON.stringify({ id: appointmentId, dni, business_slug: SUPABASE_CONFIG.BUSINESS_SLUG })
             });
             return Boolean(result.booking);
         } catch (error) {

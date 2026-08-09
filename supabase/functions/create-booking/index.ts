@@ -1,5 +1,5 @@
 import { handleOptions, json } from "../_shared/cors.ts";
-import { adminClient, isValidSlot } from "../_shared/supabase.ts";
+import { adminClient, businessForSlug, isValidSlot } from "../_shared/supabase.ts";
 
 Deno.serve(async (req) => {
   const options = handleOptions(req);
@@ -8,18 +8,20 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { name, dni, service, date, time, payment_id } = body;
+    const { name, dni, service, date, time, payment_id, business_slug } = body;
 
     if (!name || !/^\d{7,8}$/.test(String(dni)) || !service || !date || !time) {
       return json({ error: "Datos de reserva incompletos o inválidos" }, 400);
     }
-    if (!isValidSlot(date, time)) {
+    const supabase = adminClient();
+    const business = await businessForSlug(supabase, business_slug);
+    if (!(await isValidSlot(supabase, date, time, business.id))) {
       return json({ error: "Ese horario no está disponible para reservas" }, 400);
     }
 
-    const supabase = adminClient();
     await supabase.rpc("cleanup_expired_bookings");
     const { data, error } = await supabase.from("bookings").insert({
+      business_id: business.id,
       name: String(name).trim(),
       dni: String(dni),
       service,

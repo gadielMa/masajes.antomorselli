@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administración - Masajes</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .admin-page { min-height: 100vh; padding: 7rem 1.5rem 3rem; background: #f8f9fa; }
+    .admin-card { max-width: 680px; margin: 0 auto; background: #fff; padding: 2rem; border-radius: 18px; box-shadow: 0 10px 35px rgba(0,0,0,.08); }
+    .admin-card h1 { color: #2c3e50; margin-bottom: .5rem; }
+    .admin-card p { color: #666; margin-bottom: 1.5rem; }
+    .admin-form { display: grid; gap: 1rem; }
+    .admin-form label { display: grid; gap: .35rem; color: #2c3e50; font-weight: 600; }
+    .admin-form input { padding: .85rem 1rem; border: 1px solid #d8dce2; border-radius: 9px; font: inherit; }
+    .admin-form button { border: 0; cursor: pointer; padding: .95rem 1.2rem; border-radius: 9px; background: #8B4B6B; color: #fff; font: inherit; font-weight: 600; }
+    .admin-form button:disabled { opacity: .6; cursor: wait; }
+    .admin-message { margin-top: 1rem; padding: .85rem 1rem; border-radius: 9px; display: none; }
+    .admin-message.success { display: block; background: #e8f6ed; color: #176b35; }
+    .admin-message.error { display: block; background: #fdecec; color: #a52b2b; }
+    #dashboard, #loginView { display: none; }
+    .admin-topbar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+    .logout { border: 1px solid #8B4B6B; background: #fff; color: #8B4B6B; padding: .6rem 1rem; border-radius: 8px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <main class="admin-page">
+    <section id="loginView" class="admin-card">
+      <h1>Panel de administración</h1>
+      <p>Ingresá con tu cuenta de plataforma.</p>
+      <form id="loginForm" class="admin-form">
+        <label>Email<input id="loginEmail" type="email" required autocomplete="email"></label>
+        <label>Contraseña<input id="loginPassword" type="password" required autocomplete="current-password"></label>
+        <button type="submit">Ingresar</button>
+      </form>
+      <div id="loginMessage" class="admin-message"></div>
+    </section>
+
+    <section id="dashboard" class="admin-card">
+      <div class="admin-topbar"><div><h1>Crear masajista</h1><p>Creá el acceso y el negocio de una nueva profesional.</p></div><button id="logoutBtn" class="logout">Cerrar sesión</button></div>
+      <form id="createForm" class="admin-form">
+        <label>Nombre completo<input id="fullName" required></label>
+        <label>Email de acceso<input id="email" type="email" required autocomplete="off"></label>
+        <label>Contraseña inicial<input id="password" type="password" minlength="8" required autocomplete="new-password"></label>
+        <label>Nombre del negocio<input id="businessName" required></label>
+        <label>Slug público<input id="slug" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="ej: pepe-masajes" required></label>
+        <button type="submit">Crear masajista</button>
+      </form>
+      <div id="createMessage" class="admin-message"></div>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
