@@ -82,7 +82,8 @@ async function loadBusinessDashboard(user, isPlatformOwner = false) {
   scheduleCalendar?.destroy();
   scheduleCalendar = new FullCalendar.Calendar(document.getElementById('hoursCalendar'), {
     initialView: 'timeGridWeek', initialDate: new Date(), locale: 'es', firstDay: 1, allDaySlot: false,
-    slotMinTime: '06:00:00', slotMaxTime: '23:00:00', slotDuration: '00:15:00', snapDuration: '00:15:00', slotLabelInterval: '01:00:00', height: 'auto', editable: true, selectable: true,
+    buttonText: { today: 'Hoy', month: 'Mes', week: 'Semana', day: 'Día', list: 'Lista' },
+    slotMinTime: '00:00:00', slotMaxTime: '24:00:00', slotDuration: '00:15:00', snapDuration: '00:15:00', slotLabelInterval: '01:00:00', height: 'auto', editable: true, selectable: true,
     headerToolbar: { left: 'prev,next today', center: 'title', right: 'timeGridWeek,dayGridMonth' },
     events: (info, success) => success(eventDataForRange(info.start, info.end)),
     dayCellClassNames: (info) => {
