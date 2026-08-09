@@ -31,14 +31,15 @@
     .fc-event { background: #8B4B6B; border-color: #8B4B6B; cursor: move; }
     .schedule-modal { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center; padding: 1rem; background: rgba(35,25,31,.45); }
     .schedule-modal.open { display: flex; }
-    .schedule-dialog { width: min(460px, 100%); background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+    .schedule-dialog { width: min(560px, 100%); max-height: calc(100vh - 2rem); overflow-y: auto; background: white; border-radius: 16px; padding: 1.75rem; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
     .schedule-dialog h2 { margin: 0 0 1rem; color: #2c3e50; }
     .schedule-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
     .schedule-actions { display: flex; justify-content: space-between; gap: .7rem; margin-top: 1.2rem; }
-    .schedule-actions button { border: 0; border-radius: 8px; padding: .75rem 1rem; cursor: pointer; font-weight: 600; }
-    .schedule-save { background: #8B4B6B; color: #fff; }
-    .schedule-cancel { background: #eee; color: #333; }
-    .schedule-delete { background: #fdecec; color: #a52b2b; }
+    .schedule-actions button { appearance: none; border: 0; border-radius: 8px; padding: .75rem 1rem; cursor: pointer; font: inherit; font-weight: 600; line-height: 1; text-decoration: none; }
+    .schedule-save { background: #8B4B6B !important; color: #fff !important; }
+    .schedule-cancel { background: #eee !important; color: #333 !important; }
+    .schedule-delete { background: #fdecec !important; color: #a52b2b !important; text-decoration: none !important; }
+    @media (max-width: 600px) { .schedule-dialog { padding: 1.25rem; } .schedule-grid { grid-template-columns: 1fr; } .schedule-actions { align-items: stretch; flex-direction: column; } .schedule-actions > span { display: flex; justify-content: flex-end; gap: .4rem; } }
   </style>
 </head>
 <body>
