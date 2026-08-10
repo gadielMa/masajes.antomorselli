@@ -1330,3 +1330,35 @@ body {
         padding: 1.5rem;
     }
 }
+
+/* Overrides finales de la home reducida */
+body.booking-only .top-check-appointment {
+    position: static !important;
+    display: flex !important;
+    width: fit-content !important;
+    margin: 1.5rem auto 0 !important;
+    padding: 1.5rem 3rem !important;
+}
+
+body.booking-only .booking {
+    padding-top: 1.5rem !important;
+}
+
+body.booking-only .booking .container {
+    width: 100% !important;
+    max-width: 760px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+body.booking-only .booking-content {
+    display: block !important;
+    width: 100% !important;
+    max-width: 680px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+body.booking-only .payment-info {
+    display: none !important;
+}
