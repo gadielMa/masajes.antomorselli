@@ -312,7 +312,7 @@ async function refreshSession() {
         .select('business_id, businesses(slug)')
         .eq('user_id', data.session.user.id)
         .limit(1);
-      if (membershipError || !memberships?.length || !memberships[0].businesses?.slug) throw new Error('Tu usuario todavía no tiene un negocio asignado');
+      if (membershipError || !memberships?.length || !memberships[0].businesses?.slug) throw new Error('No tenés acceso a ningún negocio. Este usuario todavía no fue asignado a un negocio.');
       window.location.replace(`${window.location.pathname}?business=${encodeURIComponent(memberships[0].businesses.slug)}`);
       return;
     } else {
