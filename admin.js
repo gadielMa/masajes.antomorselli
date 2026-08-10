@@ -3,6 +3,7 @@ const loginView = document.getElementById('loginView');
 const dashboard = document.getElementById('dashboard');
 const businessDashboard = document.getElementById('businessDashboard');
 const businessSlug = new URLSearchParams(window.location.search).get('business');
+const isPlatformOwnerRoute = window.location.pathname.includes('/adminadmin');
 let currentBusiness = null;
 let platformOwnerBusinessAccess = false;
 let scheduleCalendar = null;
@@ -26,6 +27,10 @@ function argentinaHoliday(date) { return ARGENTINA_HOLIDAYS_2026[dateOnly(date)]
 
 function showMessage(element, message, type) { element.textContent = message; element.className = `admin-message ${type}`; }
 function showView(authenticated) { loginView.style.display = authenticated ? 'none' : 'block'; dashboard.style.display = 'none'; businessDashboard.style.display = 'none'; document.getElementById('clientsPanel').classList.remove('active'); document.getElementById('billingPanel').classList.remove('active'); }
+function friendlyAdminUrl(route) {
+  const match = window.location.pathname.match(/^(.*)\/admin(?:\/index\.html)?\/?$/);
+  return match ? `${match[1]}/${route}/` : `${window.location.origin}${window.location.pathname.replace(/admin(?:\.html)?\/?$/, `${route}/`)}`;
+}
 function dateOnly(date) { return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
 function parseDate(value) { return new Date(`${value}T12:00:00`); }
 function addDays(date, days) { const next = new Date(date); next.setDate(next.getDate() + days); return next; }
@@ -279,6 +284,14 @@ async function refreshSession() {
     const { data: profile, error } = await supabaseClient.from('profiles').select('role').eq('id', data.session.user.id).single();
     if (error) throw error;
     showView(true);
+    if (profile.role === 'platform_owner' && !isPlatformOwnerRoute && !businessSlug) {
+      window.location.replace(friendlyAdminUrl('adminadmin'));
+      return;
+    }
+    if (profile.role !== 'platform_owner' && isPlatformOwnerRoute && !businessSlug) {
+      window.location.replace(friendlyAdminUrl('admin'));
+      return;
+    }
     if (profile.role === 'platform_owner' && !businessSlug) {
       dashboard.style.display = 'block';
       try {
