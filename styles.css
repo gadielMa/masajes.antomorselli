@@ -38,6 +38,24 @@ body {
     background: linear-gradient(135deg, #5a6268, #495057);
 }
 
+.booking-only .top-check-appointment {
+    display: flex;
+    margin: 1.5rem auto 0;
+}
+
+.booking-only .booking .container {
+    max-width: 760px;
+}
+
+.booking-only .booking-content {
+    display: block;
+    max-width: 680px;
+}
+
+.booking-only .payment-info {
+    display: none;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
