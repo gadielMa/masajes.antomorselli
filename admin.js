@@ -28,8 +28,9 @@ function argentinaHoliday(date) { return ARGENTINA_HOLIDAYS_2026[dateOnly(date)]
 function showMessage(element, message, type) { element.textContent = message; element.className = `admin-message ${type}`; }
 function showView(authenticated) { loginView.style.display = authenticated ? 'none' : 'block'; dashboard.style.display = 'none'; businessDashboard.style.display = 'none'; document.getElementById('clientsPanel').classList.remove('active'); document.getElementById('billingPanel').classList.remove('active'); }
 function friendlyAdminUrl(route) {
-  const match = window.location.pathname.match(/^(.*)\/admin(?:\/index\.html)?\/?$/);
-  return match ? `${match[1]}/${route}/` : `${window.location.origin}${window.location.pathname.replace(/admin(?:\.html)?\/?$/, `${route}/`)}`;
+  const match = window.location.pathname.match(/^(.*)\/(?:adminadmin|admin)(?:\/index\.html)?\/?$/);
+  if (match) return `${match[1]}/${route}/`;
+  return `${window.location.origin}${window.location.pathname.replace(/(?:adminadmin|admin)(?:\.html)?\/?$/, `${route}/`)}`;
 }
 function dateOnly(date) { return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
 function parseDate(value) { return new Date(`${value}T12:00:00`); }
