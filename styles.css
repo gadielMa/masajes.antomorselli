@@ -12,6 +12,40 @@ body {
     overflow-x: hidden;
 }
 
+/* La página pública se enfoca en la reserva. */
+.booking-only .header,
+.booking-only #inicio,
+.booking-only #servicios,
+.booking-only #sobre-mi,
+.booking-only #ubicacion {
+    display: none;
+}
+
+.booking-only .booking {
+    padding-top: 2rem;
+}
+
+.top-check-appointment {
+    position: fixed;
+    top: .75rem;
+    right: 1rem;
+    z-index: 1100;
+    border: 0;
+    border-radius: 999px;
+    padding: .65rem 1rem;
+    background: #66717a;
+    color: white;
+    font: inherit;
+    font-size: .85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(44, 62, 80, .2);
+}
+
+.top-check-appointment:hover {
+    background: #4f5b64;
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;

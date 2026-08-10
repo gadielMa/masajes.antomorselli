@@ -1166,17 +1166,17 @@ function generateAvailableSlots(date, existingEvents) {
 
 // Configurar sistema de consulta de turnos
 function setupAppointmentLookup() {
-    const checkAppointmentBtn = document.getElementById('checkAppointmentBtn');
+    const checkAppointmentBtns = document.querySelectorAll('#checkAppointmentBtn, #topCheckAppointmentBtn');
     const appointmentModal = document.getElementById('appointmentModal');
     const closeAppointmentModal = document.getElementById('closeAppointmentModal');
     const searchAppointmentBtn = document.getElementById('searchAppointmentBtn');
     const lookupDniInput = document.getElementById('lookupDni');
     
     // Abrir modal de consulta
-    checkAppointmentBtn.addEventListener('click', function() {
+    checkAppointmentBtns.forEach((button) => button.addEventListener('click', function() {
         appointmentModal.style.display = 'block';
         lookupDniInput.focus();
-    });
+    }));
     
     // Cerrar modal
     closeAppointmentModal.addEventListener('click', function() {
