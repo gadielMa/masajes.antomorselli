@@ -106,10 +106,10 @@ async function loadClients() {
     if (!client.email && !client.whatsapp) contact.textContent = '—';
     const actions = document.createElement('td'); actions.className = 'client-actions';
     if (client.email) {
-      const email = document.createElement('button'); email.type = 'button'; email.className = 'client-email-button'; email.dataset.action = 'email'; email.dataset.id = client.id; email.dataset.name = client.name; email.dataset.email = client.email; email.title = `Enviar email a ${client.email}`; email.innerHTML = '<i class="fas fa-envelope"></i>'; actions.appendChild(email);
+      const email = document.createElement('button'); email.type = 'button'; email.className = 'client-email-button client-action'; email.dataset.action = 'email'; email.dataset.id = client.id; email.dataset.name = client.name; email.dataset.email = client.email; email.title = `Enviar email a ${client.email}`; email.innerHTML = '<i class="fas fa-envelope"></i> Mail'; actions.appendChild(email);
     }
     if (client.whatsapp) {
-      const whatsapp = document.createElement('a'); whatsapp.className = 'client-whatsapp-link'; whatsapp.href = `https://wa.me/${String(client.whatsapp).replace(/\D/g, '')}`; whatsapp.target = '_blank'; whatsapp.rel = 'noopener'; whatsapp.title = `Abrir WhatsApp de ${client.whatsapp}`; whatsapp.innerHTML = '<i class="fab fa-whatsapp"></i>'; actions.appendChild(whatsapp);
+      const whatsapp = document.createElement('a'); whatsapp.className = 'client-whatsapp-link client-action'; whatsapp.href = `https://wa.me/${String(client.whatsapp).replace(/\D/g, '')}`; whatsapp.target = '_blank'; whatsapp.rel = 'noopener'; whatsapp.title = `Abrir WhatsApp de ${client.whatsapp}`; whatsapp.innerHTML = '<i class="fab fa-whatsapp"></i> Wsp'; actions.appendChild(whatsapp);
     }
     const edit = document.createElement('button'); edit.className = 'client-action client-edit'; edit.dataset.action = 'edit'; edit.dataset.id = client.id; edit.dataset.name = client.name; edit.dataset.dni = client.dni; edit.dataset.email = client.email || ''; edit.dataset.whatsapp = client.whatsapp || ''; edit.textContent = 'Editar';
     const remove = document.createElement('button'); remove.className = 'client-action client-delete'; remove.dataset.action = 'delete'; remove.dataset.id = client.id; remove.dataset.name = client.name; remove.dataset.dni = client.dni; remove.textContent = 'Eliminar';
