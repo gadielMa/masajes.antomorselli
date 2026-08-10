@@ -78,8 +78,11 @@
     .client-form button { border: 0; border-radius: 8px; padding: .85rem 1rem; background: #a9cfbb; color: #365447; cursor: pointer; font: inherit; font-weight: 600; }
     .client-form label { display: grid; gap: .35rem; color: #2c3e50; font-weight: 600; }
     .client-form input { padding: .85rem 1rem; border: 1px solid #d8dce2; border-radius: 9px; font: inherit; min-width: 0; }
-    .client-actions { display: flex; gap: .4rem; }
-    .client-contact { display: flex; gap: .45rem; flex-wrap: wrap; }
+    .client-actions { display: table-cell; vertical-align: middle; white-space: nowrap; }
+    .client-actions > * { margin-right: .4rem; vertical-align: middle; }
+    .client-actions > *:last-child { margin-right: 0; }
+    .client-contact { vertical-align: middle; }
+    .client-contact span + span::before { content: ' '; }
     .client-contact a { text-decoration: none; font-size: .85rem; }
     .client-contact button { border: 0; background: transparent; padding: 0; cursor: pointer; font-size: .85rem; }
     .client-email-link { color: #d85d59; }
@@ -309,6 +312,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
   <script src="supabase-config.js"></script>
-  <script src="admin.js?v=contacts-email-2"></script>
+  <script src="admin.js?v=contacts-email-3"></script>
 </body>
 </html>
