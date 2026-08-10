@@ -98,13 +98,19 @@ async function loadClients() {
     const dni = document.createElement('td'); dni.textContent = client.dni;
     const contact = document.createElement('td'); contact.className = 'client-contact';
     if (client.email) {
-      const email = document.createElement('button'); email.type = 'button'; email.className = 'client-email-button'; email.dataset.action = 'email'; email.dataset.id = client.id; email.dataset.name = client.name; email.dataset.email = client.email; email.title = `Enviar email a ${client.email}`; email.innerHTML = '<i class="fas fa-envelope"></i>'; contact.appendChild(email);
+      const emailText = document.createElement('span'); emailText.textContent = client.email; contact.appendChild(emailText);
     }
     if (client.whatsapp) {
-      const whatsapp = document.createElement('a'); whatsapp.className = 'client-whatsapp-link'; whatsapp.href = `https://wa.me/${String(client.whatsapp).replace(/\D/g, '')}`; whatsapp.target = '_blank'; whatsapp.rel = 'noopener'; whatsapp.title = `Abrir WhatsApp de ${client.whatsapp}`; whatsapp.innerHTML = '<i class="fab fa-whatsapp"></i>'; contact.appendChild(whatsapp);
+      const whatsappText = document.createElement('span'); whatsappText.textContent = client.email ? ` · ${client.whatsapp}` : client.whatsapp; contact.appendChild(whatsappText);
     }
     if (!client.email && !client.whatsapp) contact.textContent = '—';
     const actions = document.createElement('td'); actions.className = 'client-actions';
+    if (client.email) {
+      const email = document.createElement('button'); email.type = 'button'; email.className = 'client-email-button'; email.dataset.action = 'email'; email.dataset.id = client.id; email.dataset.name = client.name; email.dataset.email = client.email; email.title = `Enviar email a ${client.email}`; email.innerHTML = '<i class="fas fa-envelope"></i>'; actions.appendChild(email);
+    }
+    if (client.whatsapp) {
+      const whatsapp = document.createElement('a'); whatsapp.className = 'client-whatsapp-link'; whatsapp.href = `https://wa.me/${String(client.whatsapp).replace(/\D/g, '')}`; whatsapp.target = '_blank'; whatsapp.rel = 'noopener'; whatsapp.title = `Abrir WhatsApp de ${client.whatsapp}`; whatsapp.innerHTML = '<i class="fab fa-whatsapp"></i>'; actions.appendChild(whatsapp);
+    }
     const edit = document.createElement('button'); edit.className = 'client-action client-edit'; edit.dataset.action = 'edit'; edit.dataset.id = client.id; edit.dataset.name = client.name; edit.dataset.dni = client.dni; edit.dataset.email = client.email || ''; edit.dataset.whatsapp = client.whatsapp || ''; edit.textContent = 'Editar';
     const remove = document.createElement('button'); remove.className = 'client-action client-delete'; remove.dataset.action = 'delete'; remove.dataset.id = client.id; remove.dataset.name = client.name; remove.dataset.dni = client.dni; remove.textContent = 'Eliminar';
     actions.append(edit, remove); row.append(name, dni, contact, actions); list.appendChild(row);
@@ -458,7 +464,10 @@ document.getElementById('clientEmailForm').addEventListener('submit', async (eve
   });
   const result = await response.json().catch(() => ({}));
   button.disabled = false;
-  if (!response.ok) return showMessage(status, result.error || 'No se pudo enviar el email.', 'error');
+  if (!response.ok) {
+    const domainError = String(result.error || '').toLowerCase().includes('domain is not verified');
+    return showMessage(status, domainError ? 'Resend todavía no verificó induliru.com. Completá la verificación DNS del dominio para poder enviar desde hola@induliru.com.' : (result.error || 'No se pudo enviar el email.'), 'error');
+  }
   showMessage(status, `Email enviado. Quedan ${result.remaining} envíos este mes.`, 'success');
   setTimeout(closeClientEmailModal, 1400);
 });
