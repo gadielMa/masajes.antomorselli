@@ -285,20 +285,8 @@ async function refreshSession() {
     const { data: profile, error } = await supabaseClient.from('profiles').select('role').eq('id', data.session.user.id).single();
     if (error) throw error;
     showView(true);
-    if (profile.role === 'platform_owner' && !isPlatformOwnerRoute && !businessSlug) {
-      window.location.replace(friendlyAdminUrl('adminadmin'));
-      return;
-    }
-    if (profile.role !== 'platform_owner' && isPlatformOwnerRoute && !businessSlug) {
-      const { data: memberships, error: membershipError } = await supabaseClient
-        .from('business_members')
-        .select('business_id, businesses(slug)')
-        .eq('user_id', data.session.user.id)
-        .limit(1);
-      if (membershipError || !memberships?.length || !memberships[0].businesses?.slug) throw new Error('No tenés acceso a ningún negocio. Este usuario todavía no fue asignado a un negocio.');
-      window.location.replace(`${friendlyAdminUrl('admin')}?business=${encodeURIComponent(memberships[0].businesses.slug)}`);
-      return;
-    }
+    if (profile.role === 'platform_owner' && !isPlatformOwnerRoute) throw new Error('Esta URL es solo para profesionales. Ingresá por /adminadmin.');
+    if (profile.role !== 'platform_owner' && isPlatformOwnerRoute) throw new Error('Esta URL es solo para administración general. Ingresá por /admin.');
     if (profile.role === 'platform_owner' && !businessSlug) {
       dashboard.style.display = 'block';
       try {
