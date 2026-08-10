@@ -26,24 +26,16 @@ body {
 }
 
 .top-check-appointment {
-    position: fixed;
-    top: .75rem;
-    right: 1rem;
-    z-index: 1100;
-    border: 0;
-    border-radius: 999px;
-    padding: .65rem 1rem;
-    background: #66717a;
-    color: white;
-    font: inherit;
-    font-size: .85rem;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(44, 62, 80, .2);
+    position: static;
+    display: flex;
+    width: fit-content;
+    margin: 1.5rem auto 0;
+    padding: 1.5rem 3rem;
+    font-size: 1.2rem;
 }
 
 .top-check-appointment:hover {
-    background: #4f5b64;
+    background: linear-gradient(135deg, #5a6268, #495057);
 }
 
 .container {
