@@ -47,4 +47,4 @@ start-servers.sh
 # 📊 Logs y datos temporales
 logs/
 *.log
-.vercel 
+.vercel
