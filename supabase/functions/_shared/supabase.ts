@@ -37,7 +37,7 @@ export async function businessForSlug(
 ) {
   const { data, error } = await supabase
     .from("businesses")
-    .select("id, name, slug, status")
+    .select("id, name, slug, status, public_profile")
     .eq("slug", slug)
     .eq("status", "active")
     .single();

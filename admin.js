@@ -71,11 +71,11 @@ async function loadAppointmentsCalendar() {
     .order('booking_date').order('booking_time');
   if (error) throw error;
 
-  const serviceNames = { descontracturante: 'Descontracturante', relajante: 'Relajante', deportivo: 'Deportivo' };
+  const serviceNames = serviceNamesForCurrentBusiness();
   const events = (bookings || []).map((booking) => {
     const start = `${booking.booking_date}T${booking.booking_time.slice(0, 8)}`;
     const end = new Date(`${start}-03:00`);
-    end.setMinutes(end.getMinutes() + 60);
+    end.setMinutes(end.getMinutes() + bookingDurationMinutes());
     const paid = booking.payment_method === 'mercadopago' && booking.status === 'confirmed';
     const cash = booking.payment_method === 'cash';
     const color = paid ? '#2e9d58' : cash ? '#d84a4a' : '#d49b2a';
@@ -176,6 +176,10 @@ async function loadPlatformBusinesses() {
   });
 }
 
+function businessServices() { return Array.isArray(currentBusiness?.public_profile?.services) ? currentBusiness.public_profile.services : []; }
+function serviceNamesForCurrentBusiness() { return Object.fromEntries(businessServices().map((service) => [service.id, service.name])); }
+function servicePricesForCurrentBusiness() { return Object.fromEntries(businessServices().map((service) => [service.id, Number(service.price) || 0])); }
+function bookingDurationMinutes() { return Number(currentBusiness?.public_profile?.slot_minutes) || 60; }
 function formatMoney(value) { return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(value); }
 function ensureBillingMonths() {
   const select = document.getElementById('billingMonth');
@@ -199,8 +203,8 @@ async function loadBilling() {
   const end = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-01`;
   const { data, error } = await supabaseClient.from('bookings').select('name, service, status, payment_method').eq('business_id', currentBusiness.id).eq('status', 'confirmed').gte('booking_date', start).lt('booking_date', end);
   if (error) throw error;
-  const prices = { descontracturante: 30000, relajante: 25000, deportivo: 35000 };
-  const names = { descontracturante: 'Descontracturante', relajante: 'Relajante', deportivo: 'Deportivo' };
+  const prices = servicePricesForCurrentBusiness();
+  const names = serviceNamesForCurrentBusiness();
   const paid = (data || []).filter((booking) => booking.payment_method !== 'pending');
   const total = paid.reduce((sum, booking) => sum + (prices[booking.service] || 0), 0);
   document.getElementById('billingTotal').textContent = formatMoney(total);
@@ -231,7 +235,7 @@ function closeScheduleModal() { document.getElementById('scheduleModal').classLi
 
 async function loadBusinessDashboard(user, allowPlatformOwner = platformOwnerBusinessAccess) {
   if (!businessSlug) return false;
-  const { data: business, error: businessError } = await supabaseClient.from('businesses').select('id, name, slug').eq('slug', businessSlug).maybeSingle();
+  const { data: business, error: businessError } = await supabaseClient.from('businesses').select('id, name, slug, public_profile').eq('slug', businessSlug).maybeSingle();
   if (businessError || !business) throw new Error('No se encontró ese negocio');
   const { data: membership, error: membershipError } = await supabaseClient.from('business_members').select('role').eq('business_id', business.id).eq('user_id', user.id).maybeSingle();
   if ((membershipError || !membership) && !allowPlatformOwner) throw new Error('No tenés acceso a este negocio');

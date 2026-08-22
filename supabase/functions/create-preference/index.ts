@@ -1,16 +1,10 @@
 import { handleOptions, json } from "../_shared/cors.ts";
 import { adminClient, businessForSlug, isValidSlot } from "../_shared/supabase.ts";
 
-const PRICES: Record<string, number> = {
-  descontracturante: 30000,
-  relajante: 25000,
-  deportivo: 35000,
-};
-
-const SERVICE_NAMES: Record<string, string> = {
-  descontracturante: "Masaje Descontracturante",
-  relajante: "Masaje Relajante",
-  deportivo: "Masaje Deportivo",
+type PublicService = {
+  id: string;
+  name: string;
+  price: number;
 };
 
 Deno.serve(async (req) => {
@@ -21,13 +15,18 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
     const { name, dni, service, date, time, business_slug } = body;
-    const price = PRICES[service];
 
-    if (!name || !/^\d{7,8}$/.test(String(dni)) || !price || !date || !time) {
+    if (!name || !/^\d{7,8}$/.test(String(dni)) || !service || !date || !time) {
       return json({ error: "Datos de reserva incompletos o inválidos" }, 400);
     }
     const supabase = adminClient();
     const business = await businessForSlug(supabase, business_slug);
+    const services = Array.isArray(business.public_profile?.services)
+      ? business.public_profile.services as PublicService[]
+      : [];
+    const selectedService = services.find((item) => item.id === service && Number.isFinite(Number(item.price)));
+    if (!selectedService) return json({ error: "El servicio seleccionado no está disponible" }, 400);
+    const price = Number(selectedService.price);
     if (!(await isValidSlot(supabase, date, time, business.id))) {
       return json({ error: "Ese horario no está disponible para reservas" }, 400);
     }
@@ -53,6 +52,19 @@ Deno.serve(async (req) => {
     }
 
     const siteUrl = Deno.env.get("PUBLIC_SITE_URL") || "https://gadielma.github.io/masajes.antomorselli";
+    const turnsPath = Deno.env.get("PUBLIC_TURNS_PATH") || "";
+    const bookingUrl = `${siteUrl.replace(/\/$/, "")}${turnsPath}/${business.slug}`;
+    const backUrls = turnsPath
+      ? {
+        success: `${bookingUrl}?payment_status=approved&source=mercadopago`,
+        failure: `${bookingUrl}?payment_status=failure&source=mercadopago`,
+        pending: `${bookingUrl}?payment_status=pending&source=mercadopago`,
+      }
+      : {
+        success: `${siteUrl}/exito.html?payment_status=approved&source=mercadopago`,
+        failure: `${siteUrl}/?payment_status=failure&source=mercadopago`,
+        pending: `${siteUrl}/?payment_status=pending&source=mercadopago`,
+      };
     const webhookUrl = `${Deno.env.get("SUPABASE_URL")}/functions/v1/mercadopago-webhook`;
     const preferenceResponse = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
@@ -63,17 +75,13 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         items: [{
           id: service,
-          title: SERVICE_NAMES[service],
+          title: selectedService.name,
           quantity: 1,
           currency_id: "ARS",
           unit_price: price,
         }],
         external_reference: booking.id,
-        back_urls: {
-          success: `${siteUrl}/exito.html?payment_status=approved&source=mercadopago`,
-          failure: `${siteUrl}/?payment_status=failure&source=mercadopago`,
-          pending: `${siteUrl}/?payment_status=pending&source=mercadopago`,
-        },
+        back_urls: backUrls,
         auto_return: "approved",
         notification_url: webhookUrl,
       }),
